@@ -2547,20 +2547,57 @@
   border-color: var(--red);
   color: var(--red);
 }
+#youtube-player {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw;
+  min-height: 100vh;
+  min-width: 177.77vh;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+  pointer-events: none;
+}
   </style>
 </head>
 <body>
- <!-- YouTube 影片背景 -->
+<!-- YouTube 影片背景（API 版本） -->
 <div class="video-background">
-  <iframe 
-    id="youtube-bg"
-    src="https://www.youtube.com/embed/Zi2RpZWhXWk?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&playlist=Zi2RpZWhXWk"
-    frameborder="0"
-    allow="autoplay; encrypted-media"
-    allowfullscreen>
-  </iframe>
+  <div id="youtube-player"></div>
 </div>
 <div class="video-overlay"></div>
+
+<script>
+  // 載入 YouTube API
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player', {
+      videoId: 'Zi2RpZWhXWk',
+      playerVars: {
+        autoplay: 1,
+        mute: 1,
+        loop: 1,
+        controls: 0,
+        showinfo: 0,
+        rel: 0,
+        playlist: 'Zi2RpZWhXWk'
+      },
+      events: {
+        onReady: onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    event.target.playVideo();
+  }
+</script>
 
   <header class="navbar">
     <div class="container nav-inner">
