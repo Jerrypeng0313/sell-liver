@@ -3199,21 +3199,49 @@ async function deleteProductFromFirebase(id) {
 
 // 管理員商品編輯狀態
 let editingProductId = null;
+// ========== 圖片處理函數 ==========
 let currentImageData = '';
 
-// DOM 元素（模態框相關）
-const productModal = document.getElementById('productModal');
-const modalTitle = document.getElementById('modalTitle');
-const closeProductModal = document.getElementById('closeProductModal');
-const cancelModalBtn = document.getElementById('cancelModalBtn');
-const saveProductBtn = document.getElementById('saveProductBtn');
-const productImageInput = document.getElementById('productImageInput');
-const imagePreview = document.getElementById('imagePreview');
-const clearImageBtn = document.getElementById('clearImageBtn');
+// 清除圖片
+function clearImage() {
+  currentImageData = '';
+  const imagePreview = document.getElementById('imagePreview');
+  const productImageInput  = document.getElementById('productImageInput');
+  const clearImageBtn = document.getElementById('clearImageBtn');
+  
+  if (imagePreview) {
+    imagePreview.src = '';
+    imagePreview.style.fontSize = '40px';
+    imagePreview.textContent = '🖼️';
+  }
+  if (productImageInput) productImageInput.value = '';
+  if (clearImageBtn) clearImageBtn.style.display = 'none';
+}
 
-// 圖片上傳處理
-productImageInput?.addEventListener('change', (e) => {
-  const file = e.target.files[0];
+// 設定預覽圖片（用於編輯時）
+function setPreviewImage(imageData) {
+  const imagePreview = document.getElementById('imagePreview');
+  const clearImageBtn = document.getElementById('clearImageBtn');
+  
+  if (!imagePreview) return;
+  
+  if (imageData && imageData.startsWith('data:image')) {
+    currentImageData = imageData;
+    imagePreview.src = imageData;
+    imagePreview.style.fontSize = '0';
+    imagePreview.textContent = '';
+    if (clearImageBtn) clearImageBtn.style.display = 'block';
+  } else {
+    clearImage();
+    if (imageData && imagePreview) {
+      imagePreview.textContent = imageData;
+    }
+  }
+}
+
+// 處理圖片上傳
+function handleImageUpload(event) {
+  const file = event.target.files[0];
   if (!file) return;
   
   if (file.size > 2 * 1024 * 1024) {
@@ -3222,36 +3250,27 @@ productImageInput?.addEventListener('change', (e) => {
   }
   
   const reader = new FileReader();
-  reader.onload = (event) => {
-    currentImageData = event.target.result;
-    imagePreview.src = currentImageData;
-    imagePreview.style.fontSize = '0';
-    clearImageBtn.style.display = 'block';
+  reader.onload = (e) => {
+    currentImageData = e.target.result;
+    const imagePreview = document.getElementById('imagePreview');
+    const clearImageBtn = document.getElementById('clearImageBtn');
+    if (imagePreview) {
+      imagePreview.src = currentImageData;
+      imagePreview.style.fontSize = '0';
+    }
+    if (clearImageBtn) clearImageBtn.style.display = 'block';
   };
   reader.readAsDataURL(file);
-});
-
-// 清除圖片
-clearImageBtn?.addEventListener('click', () => {
-  currentImageData = '';
-  imagePreview.src = '';
-  imagePreview.style.fontSize = '40px';
-  imagePreview.textContent = '🖼️';
-  productImageInput.value = '';
-  clearImageBtn.style.display = 'none';
-});
+}
 
 function openAdminAddModal() {
   editingProductId = null;
   
-  // 安全設定，避免元素不存在時報錯
   const modalTitle = document.getElementById('modalTitle');
   const productName = document.getElementById('productName');
   const productDescription = document.getElementById('productDescription');
   const productPrice = document.getElementById('productPrice');
   const productStock = document.getElementById('productStock');
-  const imagePreview = document.getElementById('imagePreview');
-  const clearImageBtn = document.getElementById('clearImageBtn');
   
   if (modalTitle) modalTitle.textContent = '➕ 新增商品';
   if (productName) productName.value = '';
@@ -3259,13 +3278,8 @@ function openAdminAddModal() {
   if (productPrice) productPrice.value = '';
   if (productStock) productStock.value = '10';
   
-  currentImageData = '';
-  if (imagePreview) {
-    imagePreview.src = '';
-    imagePreview.style.fontSize = '40px';
-    imagePreview.textContent = '🖼️';
-  }
-  if (clearImageBtn) clearImageBtn.style.display = 'none';
+  // 呼叫 clearImage 函數（現在已定義）
+  clearImage();
   
   const productModal = document.getElementById('productModal');
   if (productModal) productModal.classList.add('active');
@@ -4428,19 +4442,28 @@ function openAdminAddModal() {
   productModal.classList.add('active');
 }
 
-// 開啟編輯商品模態框
 function openAdminEditModal(id) {
   const product = products.find(p => Number(p.id) === Number(id));
   if (!product) return;
   
   editingProductId = id;
-  document.getElementById('modalTitle').textContent = '✏️ 編輯商品';
-  document.getElementById('productName').value = product.name;
-  document.getElementById('productDescription').value = product.description;
-  document.getElementById('productPrice').value = product.price;
-  document.getElementById('productStock').value = product.stock || 0;
+  
+  const modalTitle = document.getElementById('modalTitle');
+  const productName = document.getElementById('productName');
+  const productDescription = document.getElementById('productDescription');
+  const productPrice = document.getElementById('productPrice');
+  const productStock = document.getElementById('productStock');
+  
+  if (modalTitle) modalTitle.textContent = '✏️ 編輯商品';
+  if (productName) productName.value = product.name;
+  if (productDescription) productDescription.value = product.description;
+  if (productPrice) productPrice.value = product.price;
+  if (productStock) productStock.value = product.stock || 0;
+  
   setPreviewImage(product.image);
-  productModal.classList.add('active');
+  
+  const productModal = document.getElementById('productModal');
+  if (productModal) productModal.classList.add('active');
 }
 
 // 儲存商品
