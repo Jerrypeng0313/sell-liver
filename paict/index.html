@@ -50,36 +50,45 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* ========== 影片背景 ========== */
-    .video-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-      overflow: hidden;
-      background: #05070d; /* 影片載入前的背景色 */
-    }
+   /* YouTube 影片背景 */
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  overflow: hidden;
+  background: #05070d;
+  pointer-events: none; /* 讓滑鼠事件穿透，按鈕可以點擊 */
+}
 
-    .video-background video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.90; /* 調整透明度，讓內容更清楚 */
-    }
+.video-background iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw; /* 16:9 比例 */
+  min-height: 100vh;
+  min-width: 177.77vh;
+  transform: translate(-50%, -50%);
+  border: none;
+  opacity: 0.5; /* 調整透明度，讓內容更清楚 */
+}
 
-    .video-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at top left, rgba(0, 194, 255, 0.15), transparent 40%),
-                  radial-gradient(circle at top right, rgba(255, 59, 92, 0.12), transparent 40%),
-                  linear-gradient(180deg, rgba(5, 7, 13, 0.75) 0%, rgba(5, 7, 13, 0.9) 100%);
-      z-index: -1;
-    }
+/* 覆蓋層 - 讓內容更清楚 */
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(0, 194, 255, 0.15), transparent 40%),
+              radial-gradient(circle at top right, rgba(255, 59, 92, 0.12), transparent 40%),
+              linear-gradient(180deg, rgba(5, 7, 13, 0.75) 0%, rgba(5, 7, 13, 0.9) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
 
     body {
       font-family: 'Inter', sans-serif;
@@ -2541,15 +2550,17 @@
   </style>
 </head>
 <body>
-  <!-- 影片背景 -->
-  <div class="video-background">
-    <video autoplay muted loop playsinline>
-      <!-- 請將 src 改為您的影片路徑 -->
-      <source src="race-bg.mp4" type="video/mp4">
-      <!-- 如果影片無法載入，顯示備用背景色 -->
-    </video>
-  </div>
-  <div class="video-overlay"></div>
+ <!-- YouTube 影片背景 -->
+<div class="video-background">
+  <iframe 
+    id="youtube-bg"
+    src="https://www.youtube.com/embed/Zi2RpZWhXWk?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&playlist=Zi2RpZWhXWk"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen>
+  </iframe>
+</div>
+<div class="video-overlay"></div>
 
   <header class="navbar">
     <div class="container nav-inner">
