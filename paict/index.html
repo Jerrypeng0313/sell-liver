@@ -3199,6 +3199,7 @@ async function deleteProductFromFirebase(id) {
 
 // 管理員商品編輯狀態
 let editingProductId = null;
+
 // ========== 圖片處理函數 ==========
 let currentImageData = '';
 
@@ -3206,7 +3207,7 @@ let currentImageData = '';
 function clearImage() {
   currentImageData = '';
   const imagePreview = document.getElementById('imagePreview');
-  const productImageInput  = document.getElementById('productImageInput');
+  const productImageInput = document.getElementById('productImageInput');
   const clearImageBtn = document.getElementById('clearImageBtn');
   
   if (imagePreview) {
@@ -4173,10 +4174,19 @@ function handleCredentialResponse(response) {
       }
 
       function bindEvents() {
+        const productImageInput = document.getElementById('productImageInput');
+       const clearImageBtn = document.getElementById('clearImageBtn');
+
+      if (productImageInput) {
+      productImageInput.addEventListener('change', handleImageUpload);
+      }
+      if (clearImageBtn) {
+      clearImageBtn.addEventListener('click', clearImage);
+      }
         document.querySelectorAll('[data-page]').forEach(link => {
           link.addEventListener('click', (e) => { e.preventDefault(); switchPage(link.dataset.page); });
         });
-
+ 
         cartToggleBtn?.addEventListener('click', openCart);
         closeCartBtn?.addEventListener('click', closeCart);
         cartOverlay?.addEventListener('click', closeCart);
