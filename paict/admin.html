@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>RACE · 管理員後台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-0: #05070d;
+      --bg-1: #070b14;
+      --bg-2: #0d1322;
+      --surface: rgba(8, 20, 35, 0.5);
+      --surface-strong: rgba(15, 30, 48, 0.7);
+      --gold: #FFD700;
+      --gold-glow: rgba(255, 215, 0, 0.35);
+      --blue: #00c2ff;
+      --red: #ff3b5c;
+      --success: #2dff9d;
+      --text: #f0f4ff;
+      --muted: rgba(240, 244, 255, 0.72);
+      --muted-2: rgba(240, 244, 255, 0.48);
+      --radius-sm: 12px;
+      --radius-md: 16px;
+      --radius-lg: 20px;
+      --shadow-1: 0 8px 20px rgba(0, 0, 0, 0.28);
+      --transition-fast: 140ms;
+      --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      color: var(--text);
+      background: radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 26%),
+                  radial-gradient(circle at top right, rgba(255, 215, 0, 0.08), transparent 24%),
+                  linear-gradient(180deg, #0a0a0a 0%, #05070d 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255, 215, 0, 0.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 215, 0, 0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      z-index: 0;
+    }
+
+    .container {
+      width: min(1400px, calc(100% - 32px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    .logo-mark {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--gold), #ff8c00);
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, var(--gold), #fff8dc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .admin-badge {
+      background: linear-gradient(135deg, var(--gold), #ff8c00);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #05070d;
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 28px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 25px 50px -8px rgba(0,0,0,0.6), 0 0 40px rgba(255, 215, 0, 0.15);
+      padding: 40px 32px;
+    }
+
+    .login-card h2 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--gold), #fff8dc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .admin-panel {
+      padding: 32px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(16px);
+    }
+
+    .stat-card .stat-label {
+      color: var(--muted-2);
+      font-size: 13px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .products-section {
+      background: var(--surface);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(16px);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-header h2 {
+      font-size: 1.5rem;
+      color: var(--gold);
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      border-radius: 14px;
+      padding: 12px 20px;
+      transition: all var(--transition-fast) var(--ease-smooth);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), #ff8c00);
+      color: #05070d;
+      box-shadow: 0 8px 20px rgba(255, 215, 0, 0.25);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--red), #b91c1c);
+      color: white;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      color: var(--text);
+    }
+
+    .products-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .products-table th {
+      text-align: left;
+      padding: 16px 12px;
+      color: var(--gold);
+      font-weight: 600;
+      border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .products-table td {
+      padding: 16px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .product-image-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: linear-gradient(135deg, rgba(0, 194, 255, 0.1), rgba(255, 59, 92, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .action-btn.edit:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .action-btn.delete:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 28px;
+      backdrop-filter: blur(24px);
+      padding: 32px;
+      transform: scale(0.95);
+      transition: transform 0.25s;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-header h3 {
+      font-size: 1.5rem;
+      color: var(--gold);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .input-group label {
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1.5px solid rgba(255, 215, 0, 0.2);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 18px var(--gold-glow);
+    }
+
+    textarea.input-field {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .image-upload-area {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .image-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1.5px dashed rgba(255, 215, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      cursor: pointer;
+      object-fit: cover;
+    }
+
+    .image-upload-info {
+      flex: 1;
+      color: var(--muted-2);
+      font-size: 0.85rem;
+    }
+
+    .image-upload-info .hint {
+      margin-top: 8px;
+      color: var(--gold);
+      font-size: 0.8rem;
+    }
+
+    #productImageInput {
+      display: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    #toastContainer {
+      position: fixed;
+      top: 90px;
+      left: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .products-table { display: block; overflow-x: auto; }
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 登入頁面 -->
+  <div id="loginPage" class="login-container">
+    <div class="login-card">
+      <h2>🔐 管理員登入</h2>
+      <p>請輸入管理員憑證以進入後台</p>
+      
+      <div class="input-group">
+        <label>👤 管理員帳號</label>
+        <input type="text" id="adminUsername" class="input-field" placeholder="admin" value="admin">
+      </div>
+      <div class="input-group">
+        <label>🔒 密碼</label>
+        <input type="password" id="adminPassword" class="input-field" placeholder="••••••••" value="admin123">
+      </div>
+      
+      <div id="loginError" style="color: var(--red); font-size: 14px; margin-bottom: 16px; display: none;"></div>
+      
+      <button class="btn btn-gold" id="adminLoginBtn" style="width: 100%;">🏁 進入管理後台</button>
+      
+      <p style="text-align: center; margin-top: 20px; color: var(--muted-2); font-size: 13px;">
+        預設帳號：admin / admin123
+      </p>
+    </div>
+  </div>
+
+  <!-- 管理後台 -->
+  <div id="adminPanel" class="hidden">
+    <header class="navbar">
+      <div class="container nav-inner">
+        <div class="logo">
+          <span class="logo-mark"></span>
+          <span>RACE ADMIN</span>
+        </div>
+        <div class="nav-links">
+          <span class="admin-badge">👑 管理員模式</span>
+          <button class="btn btn-ghost" id="logoutBtn" style="padding: 8px 16px;">🚪 登出</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container admin-panel">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">總商品數</div>
+          <div class="stat-value" id="totalProducts">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">總庫存</div>
+          <div class="stat-value" id="totalStock">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">平均價格</div>
+          <div class="stat-value" id="avgPrice">NT$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">最高價格</div>
+          <div class="stat-value" id="maxPrice">NT$0</div>
+        </div>
+      </div>
+
+      <div class="products-section">
+        <div class="section-header">
+          <h2>📦 商品管理</h2>
+          <button class="btn btn-gold" id="addProductBtn">➕ 新增商品</button>
+        </div>
+
+        <div id="productsTableContainer">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>圖片</th>
+                <th>商品名稱</th>
+                <th>描述</th>
+                <th>價格</th>
+                <th>庫存</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+        <div id="emptyProducts" class="empty-state hidden">
+          <p>📭 尚無商品，點擊「新增商品」開始添加</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新增/編輯商品模態框 -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">➕ 新增商品</h3>
+        <button class="close-modal" id="closeProductModal">&times;</button>
+      </div>
+      
+      <div class="input-group">
+        <label>🖼️ 商品圖片</label>
+        <div class="image-upload-area">
+          <img id="imagePreview" class="image-preview" src="" alt="點擊上傳圖片" onclick="document.getElementById('productImageInput').click()">
+          <div class="image-upload-info">
+            <p>點擊圖片或下方按鈕上傳</p>
+            <p class="hint">支援 JPG、PNG、GIF（自動轉換為 Base64）</p>
+            <button type="button" class="btn btn-ghost" style="margin-top: 8px; padding: 8px 16px;" onclick="document.getElementById('productImageInput').click()">
+              📁 選擇圖片
+            </button>
+            <button type="button" class="btn btn-ghost" id="clearImageBtn" style="margin-top: 8px; padding: 8px 16px; display: none;">
+              🗑️ 清除圖片
+            </button>
+          </div>
+        </div>
+        <input type="file" id="productImageInput" accept="image/*">
+      </div>
+      
+      <div class="input-group">
+        <label>📝 商品名稱</label>
+        <input type="text" id="productName" class="input-field" placeholder="商品名稱">
+      </div>
+      <div class="input-group">
+        <label>📄 商品描述</label>
+        <textarea id="productDescription" class="input-field" placeholder="商品描述" rows="2"></textarea>
+      </div>
+      <div class="input-group">
+        <label>💰 價格 (NT$)</label>
+        <input type="number" id="productPrice" class="input-field" placeholder="價格" min="0" step="1">
+      </div>
+      <div class="input-group">
+        <label>📦 庫存數量</label>
+        <input type="number" id="productStock" class="input-field" placeholder="庫存" min="0" value="10">
+      </div>
+      
+      <div id="modalError" style="color: var(--red); font-size: 14px; margin-bottom: 12px; display: none;"></div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelModalBtn">取消</button>
+        <button class="btn btn-gold" id="saveProductBtn">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 刪除確認模態框 -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-card" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 style="color: var(--red);">⚠️ 確認刪除</h3>
+        <button class="close-modal" id="closeDeleteModal">&times;</button>
+      </div>
+      <p style="margin-bottom: 24px;">確定要刪除商品 <strong id="deleteProductName"></strong> 嗎？</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelDeleteBtn">取消</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">🗑️ 刪除</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script>
+    (function(){
+      'use strict';
+
+      // ========== 管理員帳號 ==========
+      const ADMIN_USERNAME = 'admin';
+      const ADMIN_PASSWORD = 'admin123';
+      
+      // ========== 預設商品 ==========
+      const DEFAULT_PRODUCTS = [
+        { id: 1, name: '霓虹賽車手套', price: 1290, image: '🧤', description: '專業級賽車手套，防滑透氣', stock: 25 },
+        { id: 2, name: '碳纖維安全帽', price: 8990, image: '⛑️', description: '輕量化碳纖維，霓虹藍塗裝', stock: 12 },
+        { id: 3, name: '競速賽車服', price: 4590, image: '👕', description: '防火材質，紅藍漸層設計', stock: 18 },
+        { id: 4, name: '賽車鞋', price: 2890, image: '👟', description: '極致抓地力，專業賽車鞋', stock: 30 },
+        { id: 5, name: 'RACE 連帽外套', price: 1890, image: '🧥', description: '限量版霓虹刺繡外套', stock: 22 },
+        { id: 6, name: '鈦合金排氣管', price: 12900, image: '🔧', description: '高性能改裝排氣管', stock: 5 }
+      ];
+
+      // ========== 狀態 ==========
+      let products = [];
+      let editingProductId = null;
+      let deleteProductId = null;
+      let currentImageData = '';
+
+      // ========== DOM 元素 ==========
+      const loginPage = document.getElementById('loginPage');
+      const adminPanel = document.getElementById('adminPanel');
+      const adminLoginBtn = document.getElementById('adminLoginBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const loginError = document.getElementById('loginError');
+      const adminUsername = document.getElementById('adminUsername');
+      const adminPassword = document.getElementById('adminPassword');
+      
+      const productsTableBody = document.getElementById('productsTableBody');
+      const emptyProducts = document.getElementById('emptyProducts');
+      const totalProductsEl = document.getElementById('totalProducts');
+      const totalStockEl = document.getElementById('totalStock');
+      const avgPriceEl = document.getElementById('avgPrice');
+      const maxPriceEl = document.getElementById('maxPrice');
+      
+      const addProductBtn = document.getElementById('addProductBtn');
+      const productModal = document.getElementById('productModal');
+      const closeProductModal = document.getElementById('closeProductModal');
+      const cancelModalBtn = document.getElementById('cancelModalBtn');
+      const saveProductBtn = document.getElementById('saveProductBtn');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalError = document.getElementById('modalError');
+      
+      const productImageInput = document.getElementById('productImageInput');
+      const imagePreview = document.getElementById('imagePreview');
+      const clearImageBtn = document.getElementById('clearImageBtn');
+      const productName = document.getElementById('productName');
+      const productDescription = document.getElementById('productDescription');
+      const productPrice = document.getElementById('productPrice');
+      const productStock = document.getElementById('productStock');
+      
+      const deleteModal = document.getElementById('deleteModal');
+      const closeDeleteModal = document.getElementById('closeDeleteModal');
+      const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      const deleteProductName = document.getElementById('deleteProductName');
+
+      // ========== 初始化 ==========
+      function loadProducts() {
+        console.log('📦 載入商品...');
+        const stored = localStorage.getItem('raceAdminProducts');
+        
+        if (stored) {
+          try {
+            products = JSON.parse(stored);
+            // 確保 ID 是數字
+            products = products.map(p => ({ ...p, id: Number(p.id) }));
+            console.log('✅ 解析成功，共', products.length, '件商品');
+          } catch (e) {
+            console.error('❌ 解析失敗，使用預設值');
+            products = [...DEFAULT_PRODUCTS];
+          }
+        } else {
+          console.log('📝 無儲存資料，使用預設值');
+          products = [...DEFAULT_PRODUCTS];
+        }
+        saveProducts();
+      }
+
+      function saveProducts() {
+        console.log('💾 儲存商品，共', products.length, '件');
+        localStorage.setItem('raceAdminProducts', JSON.stringify(products));
+        // 同步到前台商店
+        const shopProducts = products.map(p => ({
+          id: p.id, name: p.name, price: p.price, image: p.image, description: p.description
+        }));
+        localStorage.setItem('raceShopProducts', JSON.stringify(shopProducts));
+        console.log('✅ 商品已儲存並同步到前台');
+      }
+
+      // ========== Toast ==========
+      function showToast(msg, type = 'info') {
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'toastContainer';
+          container.style.cssText = 'position:fixed;top:90px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none';
+          document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        let icon, borderColor;
+        if (type === 'success') { icon = '✓'; borderColor = '#2dff9d'; }
+        else if (type === 'error') { icon = '✕'; borderColor = '#ff3b5c'; }
+        else { icon = '●'; borderColor = '#FFD700'; }
+        
+        toast.style.cssText = `display:inline-flex;align-items:center;gap:8px;background:rgba(5,10,20,0.95);backdrop-filter:blur(16px);border:1px solid ${borderColor}50;border-radius:30px;padding:8px 16px;box-shadow:0 4px 12px rgba(0,0,0,0.4);transform:translateX(-120%);transition:all 0.25s;opacity:0;`;
+        toast.innerHTML = `<span style="color:${borderColor};font-weight:700;">${icon}</span><span style="color:#f0f4ff;font-size:13px;">${msg}</span>`;
+        container.appendChild(toast);
+        
+        requestAnimationFrame(() => { toast.style.transform = 'translateX(0)'; toast.style.opacity = '1'; });
+        setTimeout(() => { toast.style.transform = 'translateX(-120%)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 250); }, 2500);
+      }
+
+      // ========== 登入 ==========
+      function handleLogin() {
+        const username = adminUsername.value.trim();
+        const password = adminPassword.value;
+        
+        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+          sessionStorage.setItem('adminLoggedIn', 'true');
+          loginPage.classList.add('hidden');
+          adminPanel.classList.remove('hidden');
+          loadProducts();
+          renderProducts();
+          updateStats();
+          showToast('✅ 登入成功！歡迎回來，管理員', 'success');
+        } else {
+          loginError.textContent = '帳號或密碼錯誤';
+          loginError.style.display = 'block';
+        }
+      }
+
+      function handleLogout() {
+        sessionStorage.removeItem('adminLoggedIn');
+        loginPage.classList.remove('hidden');
+        adminPanel.classList.add('hidden');
+        adminPassword.value = '';
+        loginError.style.display = 'none';
+        showToast('👋 已登出', 'info');
+      }
+
+      function checkLoginStatus() {
+        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+          loginPage.classList.add('hidden');
+          adminPanel.classList.remove('hidden');
+          loadProducts();
+          renderProducts();
+          updateStats();
+        }
+      }
+
+      // ========== 商品渲染 ==========
+      function renderProducts() {
+        console.log('🎨 渲染商品表格，共', products.length, '件');
+        
+        if (!productsTableBody) return;
+        
+        if (products.length === 0) {
+          productsTableBody.innerHTML = '';
+          emptyProducts.classList.remove('hidden');
+          document.querySelector('.products-table').style.display = 'none';
+          return;
+        }
+        
+        emptyProducts.classList.add('hidden');
+        document.querySelector('.products-table').style.display = 'table';
+        
+        productsTableBody.innerHTML = products.map(p => {
+          const isBase64 = p.image && p.image.startsWith('data:image');
+          const imageContent = isBase64 
+            ? `<img src="${p.image}" class="product-image-preview" style="object-fit: cover;">` 
+            : `<span style="font-size: 28px;">${p.image || '📦'}</span>`;
+          
+          return `
+            <tr>
+              <td><div class="product-image-preview">${imageContent}</div></td>
+              <td><strong>${p.name}</strong></td>
+              <td style="color: var(--muted); max-width: 200px;">${p.description}</td>
+              <td style="color: var(--gold); font-weight: 700;">NT$${p.price.toLocaleString()}</td>
+              <td>${p.stock || 0}</td>
+              <td>
+                <div class="product-actions">
+                  <button class="action-btn edit" data-id="${p.id}">✏️ 編輯</button>
+                  <button class="action-btn delete" data-id="${p.id}">🗑️ 刪除</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        
+        // 綁定編輯按鈕
+        document.querySelectorAll('.action-btn.edit').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = Number(btn.dataset.id);
+            console.log('✏️ 點擊編輯，ID:', id);
+            openEditModal(id);
+          });
+        });
+        
+        // 綁定刪除按鈕
+        document.querySelectorAll('.action-btn.delete').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = Number(btn.dataset.id);
+            console.log('🗑️ 點擊刪除，ID:', id);
+            openDeleteModal(id);
+          });
+        });
+      }
+
+      function updateStats() {
+        const total = products.length;
+        const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+        const avgPrice = total > 0 ? Math.round(products.reduce((sum, p) => sum + p.price, 0) / total) : 0;
+        const maxPrice = total > 0 ? Math.max(...products.map(p => p.price)) : 0;
+        
+        totalProductsEl.textContent = total;
+        totalStockEl.textContent = totalStock;
+        avgPriceEl.textContent = `NT$${avgPrice.toLocaleString()}`;
+        maxPriceEl.textContent = `NT$${maxPrice.toLocaleString()}`;
+      }
+
+      // ========== 圖片處理 ==========
+      function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('❌ 圖片大小不能超過 2MB', 'error');
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          currentImageData = e.target.result;
+          imagePreview.src = currentImageData;
+          imagePreview.style.fontSize = '0';
+          clearImageBtn.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function clearImage() {
+        currentImageData = '';
+        imagePreview.src = '';
+        imagePreview.style.fontSize = '40px';
+        imagePreview.textContent = '🖼️';
+        productImageInput.value = '';
+        clearImageBtn.style.display = 'none';
+      }
+
+      function setPreviewImage(imageData) {
+        if (imageData && imageData.startsWith('data:image')) {
+          currentImageData = imageData;
+          imagePreview.src = imageData;
+          imagePreview.style.fontSize = '0';
+          imagePreview.textContent = '';
+          clearImageBtn.style.display = 'block';
+        } else {
+          clearImage();
+          if (imageData) {
+            imagePreview.textContent = imageData;
+          }
+        }
+      }
+
+      // ========== 模態框 ==========
+      function openAddModal() {
+        editingProductId = null;
+        modalTitle.textContent = '➕ 新增商品';
+        productName.value = '';
+        productDescription.value = '';
+        productPrice.value = '';
+        productStock.value = '10';
+        modalError.style.display = 'none';
+        clearImage();
+        imagePreview.textContent = '🖼️';
+        productModal.classList.add('active');
+      }
+
+      function openEditModal(id) {
+        const product = products.find(p => Number(p.id) === Number(id));
+        if (!product) {
+          console.error('❌ 找不到商品 ID:', id);
+          showToast('❌ 找不到商品', 'error');
+          return;
+        }
+        
+        editingProductId = id;
+        modalTitle.textContent = '✏️ 編輯商品';
+        productName.value = product.name;
+        productDescription.value = product.description;
+        productPrice.value = product.price;
+        productStock.value = product.stock || 0;
+        modalError.style.display = 'none';
+        setPreviewImage(product.image);
+        if (!product.image) imagePreview.textContent = '🖼️';
+        productModal.classList.add('active');
+      }
+
+      function closeModal() {
+        productModal.classList.remove('active');
+        editingProductId = null;
+        clearImage();
+      }
+
+      function saveProduct() {
+        const name = productName.value.trim();
+        const description = productDescription.value.trim();
+        const price = parseInt(productPrice.value);
+        const stock = parseInt(productStock.value) || 0;
+        
+        let image = currentImageData;
+        if (!image) image = '📦';
+        
+        if (!name || !description || !price) {
+          modalError.textContent = '請填寫所有欄位';
+          modalError.style.display = 'block';
+          return;
+        }
+        
+        if (price < 0) {
+          modalError.textContent = '價格不能為負數';
+          modalError.style.display = 'block';
+          return;
+        }
+        
+        if (editingProductId) {
+          const index = products.findIndex(p => Number(p.id) === Number(editingProductId));
+          if (index !== -1) {
+            products[index] = { ...products[index], image, name, description, price, stock };
+          }
+          showToast(`✅ 已更新「${name}」`, 'success');
+        } else {
+          const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+          products.push({ id: newId, image, name, description, price, stock });
+          showToast(`✅ 已新增「${name}」`, 'success');
+        }
+        
+        saveProducts();
+        renderProducts();
+        updateStats();
+        closeModal();
+      }
+
+      // ========== 刪除 ==========
+      function openDeleteModal(id) {
+        const product = products.find(p => Number(p.id) === Number(id));
+        if (!product) {
+          console.error('❌ 找不到商品 ID:', id);
+          showToast('❌ 找不到商品', 'error');
+          return;
+        }
+        
+        deleteProductId = id;
+        deleteProductName.textContent = product.name;
+        deleteModal.classList.add('active');
+      }
+
+      function confirmDelete() {
+        if (!deleteProductId) return;
+        
+        const product = products.find(p => Number(p.id) === Number(deleteProductId));
+        products = products.filter(p => Number(p.id) !== Number(deleteProductId));
+        saveProducts();
+        renderProducts();
+        updateStats();
+        deleteModal.classList.remove('active');
+        showToast(`🗑️ 已刪除「${product?.name}」`, 'info');
+        deleteProductId = null;
+      }
+
+      // ========== 事件綁定 ==========
+      function bindEvents() {
+        adminLoginBtn.addEventListener('click', handleLogin);
+        adminPassword.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
+        logoutBtn.addEventListener('click', handleLogout);
+        
+        addProductBtn.addEventListener('click', openAddModal);
+        closeProductModal.addEventListener('click', closeModal);
+        cancelModalBtn.addEventListener('click', closeModal);
+        productModal.addEventListener('click', (e) => { if (e.target === productModal) closeModal(); });
+        saveProductBtn.addEventListener('click', saveProduct);
+        
+        productImageInput.addEventListener('change', handleImageUpload);
+        clearImageBtn.addEventListener('click', clearImage);
+        
+        closeDeleteModal.addEventListener('click', () => deleteModal.classList.remove('active'));
+        cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.remove('active'));
+        deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) deleteModal.classList.remove('active'); });
+        confirmDeleteBtn.addEventListener('click', confirmDelete);
+      }
+
+      // ========== 啟動 ==========
+      function init() {
+        console.log('🚀 管理後台初始化開始');
+        loadProducts();
+        bindEvents();
+        checkLoginStatus();
+        imagePreview.textContent = '🖼️';
+        console.log('✅ 管理後台已初始化');
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
