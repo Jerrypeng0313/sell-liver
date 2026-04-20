@@ -2306,6 +2306,116 @@
 .btn-game:hover .btn-icon svg {
   filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
 }
+/* ========== 管理員介面樣式 ========== */
+.admin-panel {
+  padding: 20px 0;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.panel-header h2 {
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #FFD700, #ff3b5c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(16px);
+}
+
+.stat-card .stat-label {
+  color: var(--muted-2);
+  font-size: 13px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.stat-card .stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.products-section {
+  background: var(--surface);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 20px;
+  padding: 24px;
+  backdrop-filter: blur(16px);
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table th {
+  text-align: left;
+  padding: 16px 12px;
+  color: var(--gold);
+  font-weight: 600;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.products-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-only.show {
+  display: flex !important;
+}
+
+/* 管理員商品圖片預覽 */
+.admin-product-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: linear-gradient(135deg, rgba(0, 194, 255, 0.1), rgba(255, 59, 92, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.action-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.action-btn.edit:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.action-btn.delete:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
   </style>
 </head>
 <body>
@@ -2325,21 +2435,22 @@
         <span class="logo-mark"></span>
         <span>RACE UI</span>
       </div>
-      <nav class="nav-links">
-        <a class="nav-link active" data-page="dashboard">🏠 首頁</a>
-        <a class="nav-link" data-page="shop">🛒 商店</a>
-        <a class="nav-link" data-page="race">🏁 賽事</a>
-        <a class="nav-link" data-page="leaderboard">🏆 排行榜</a>
-        
-        <div class="cart-icon" id="cartToggleBtn">
-          🛒
-          <span class="cart-count" id="cartCount">0</span>
-        </div>
-        
-        <div id="authButtonContainer">
-          <a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>
-        </div>
-      </nav>
+ <nav class="nav-links">
+  <a class="nav-link active" data-page="dashboard">🏠 首頁</a>
+  <a class="nav-link" data-page="shop">🛒 商店</a>
+  <a class="nav-link" data-page="race">🏁 賽事</a>
+  <a class="nav-link" data-page="leaderboard">🏆 排行榜</a>
+  <a class="nav-link admin-only" data-page="admin" style="display: none;" id="adminNavLink">👑 管理</a>
+  
+  <div class="cart-icon" id="cartToggleBtn">
+    🛒
+    <span class="cart-count" id="cartCount">0</span>
+  </div>
+  
+  <div id="authButtonContainer">
+    <a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>
+  </div>
+</nav>
     </div>
   </header>
 
@@ -2350,6 +2461,56 @@
     </div>
 
     <div class="page-container">
+
+      <!-- 在 page-container 中添加管理員頁面 -->
+<div id="adminPage" class="page">
+  <div class="admin-panel">
+    <div class="panel-header">
+      <h2>👑 商品管理</h2>
+      <button class="btn btn-gold" id="addProductBtn">➕ 新增商品</button>
+    </div>
+    
+    <!-- 統計卡片 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">總商品數</div>
+        <div class="stat-value" id="totalProducts">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">總庫存</div>
+        <div class="stat-value" id="totalStock">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">平均價格</div>
+        <div class="stat-value" id="avgPrice">NT$0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最高價格</div>
+        <div class="stat-value" id="maxPrice">NT$0</div>
+      </div>
+    </div>
+    
+    <!-- 商品表格 -->
+    <div class="products-section">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>圖片</th>
+            <th>商品名稱</th>
+            <th>描述</th>
+            <th>價格</th>
+            <th>庫存</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="adminProductsTableBody"></tbody>
+      </table>
+      <div id="emptyProducts" class="empty-state hidden">
+        <p>📭 尚無商品，點擊「新增商品」開始添加</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 首頁 -->
 <div id="dashboardPage" class="page active">
@@ -3811,6 +3972,232 @@ function updateServerStats() {
     pingEl.textContent = `${mockPing} ms`;
   }
 }
+// ========== 管理員設定 ==========
+const ADMIN_EMAILS = ['admin@liver.com', 'jerrypeng0313@gmail.com']; // 管理員信箱列表
+
+// 檢查是否為管理員
+function isAdmin(user) {
+  if (!user) return false;
+  return ADMIN_EMAILS.includes(user.email.toLowerCase());
+}
+
+// 更新 UI 顯示管理員功能
+function updateAdminUI(user) {
+  const adminElements = document.querySelectorAll('.admin-only');
+  const adminNavLink = document.getElementById('adminNavLink');
+  
+  if (isAdmin(user)) {
+    // 顯示管理員專屬元素
+    adminElements.forEach(el => el.classList.add('show'));
+    if (adminNavLink) adminNavLink.style.display = 'block';
+    console.log('👑 管理員模式已啟用');
+  } else {
+    // 隱藏管理員專屬元素
+    adminElements.forEach(el => el.classList.remove('show'));
+    if (adminNavLink) adminNavLink.style.display = 'none';
+  }
+}
+
+// 修改 updateUIForLogin 函數，加入管理員檢查
+function updateUIForLogin(user) {
+  if (user) {
+    const avatarUrl = user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=00c2ff&color=fff`;
+    authButtonContainer.innerHTML = `
+      <div class="user-profile" id="userProfileBtn">
+        <img src="${avatarUrl}" alt="${user.name}" class="user-avatar">
+        <span class="user-name">${user.name.split(' ')[0]}</span>
+        ${isAdmin(user) ? '<span style="margin-left:4px;color:#FFD700;">👑</span>' : ''}
+      </div>
+    `;
+    
+    if (welcomeBanner) {
+      welcomeBanner.style.display = 'block';
+      if (displayUserName) displayUserName.textContent = user.name;
+      if (loginMethodBadge) {
+        loginMethodBadge.textContent = user.loginMethod === 'google' ? '(Google)' : '(Email)';
+      }
+    }
+    
+    // 更新管理員 UI
+    updateAdminUI(user);
+    
+    document.getElementById('userProfileBtn')?.addEventListener('click', showUserMenu);
+  } else {
+    authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
+    document.getElementById('showAuthBtn')?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+    if (welcomeBanner) welcomeBanner.style.display = 'none';
+    
+    // 隱藏管理員 UI
+    updateAdminUI(null);
+  }
+}
+
+// ========== 管理員商品管理功能 ==========
+let editingProductId = null;
+let currentImageData = '';
+
+// 渲染管理員商品表格
+function renderAdminProducts() {
+  const tbody = document.getElementById('adminProductsTableBody');
+  const emptyState = document.getElementById('emptyProducts');
+  
+  if (!tbody) return;
+  
+  if (products.length === 0) {
+    tbody.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  
+  emptyState.classList.add('hidden');
+  
+  tbody.innerHTML = products.map(p => {
+    const isBase64 = p.image && p.image.startsWith('data:image');
+    const imageContent = isBase64 
+      ? `<img src="${p.image}" class="admin-product-image" style="object-fit: cover;">` 
+      : `<span style="font-size: 28px;">${p.image || '📦'}</span>`;
+    
+    return `
+      <tr>
+        <td><div class="admin-product-image">${imageContent}</div></td>
+        <td><strong>${p.name}</strong></td>
+        <td style="color: var(--muted); max-width: 200px;">${p.description}</td>
+        <td style="color: var(--gold); font-weight: 700;">NT$${p.price.toLocaleString()}</td>
+        <td>${p.stock || 0}</td>
+        <td>
+          <button class="action-btn edit" data-id="${p.id}">✏️ 編輯</button>
+          <button class="action-btn delete" data-id="${p.id}">🗑️ 刪除</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+  
+  // 綁定編輯按鈕
+  tbody.querySelectorAll('.action-btn.edit').forEach(btn => {
+    btn.addEventListener('click', () => openAdminEditModal(Number(btn.dataset.id)));
+  });
+  
+  // 綁定刪除按鈕
+  tbody.querySelectorAll('.action-btn.delete').forEach(btn => {
+    btn.addEventListener('click', () => deleteProduct(Number(btn.dataset.id)));
+  });
+  
+  // 更新統計
+  updateAdminStats();
+}
+
+// 更新管理員統計
+function updateAdminStats() {
+  const total = products.length;
+  const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+  const avgPrice = total > 0 ? Math.round(products.reduce((sum, p) => sum + p.price, 0) / total) : 0;
+  const maxPrice = total > 0 ? Math.max(...products.map(p => p.price)) : 0;
+  
+  document.getElementById('totalProducts').textContent = total;
+  document.getElementById('totalStock').textContent = totalStock;
+  document.getElementById('avgPrice').textContent = `NT$${avgPrice.toLocaleString()}`;
+  document.getElementById('maxPrice').textContent = `NT$${maxPrice.toLocaleString()}`;
+}
+
+// 開啟新增商品模態框
+function openAdminAddModal() {
+  editingProductId = null;
+  document.getElementById('modalTitle').textContent = '➕ 新增商品';
+  document.getElementById('productName').value = '';
+  document.getElementById('productDescription').value = '';
+  document.getElementById('productPrice').value = '';
+  document.getElementById('productStock').value = '10';
+  clearImage();
+  productModal.classList.add('active');
+}
+
+// 開啟編輯商品模態框
+function openAdminEditModal(id) {
+  const product = products.find(p => Number(p.id) === Number(id));
+  if (!product) return;
+  
+  editingProductId = id;
+  document.getElementById('modalTitle').textContent = '✏️ 編輯商品';
+  document.getElementById('productName').value = product.name;
+  document.getElementById('productDescription').value = product.description;
+  document.getElementById('productPrice').value = product.price;
+  document.getElementById('productStock').value = product.stock || 0;
+  setPreviewImage(product.image);
+  productModal.classList.add('active');
+}
+
+// 儲存商品
+function saveAdminProduct() {
+  const name = document.getElementById('productName').value.trim();
+  const description = document.getElementById('productDescription').value.trim();
+  const price = parseInt(document.getElementById('productPrice').value);
+  const stock = parseInt(document.getElementById('productStock').value) || 0;
+  
+  let image = currentImageData;
+  if (!image) image = '📦';
+  
+  if (!name || !description || !price) {
+    alert('請填寫所有欄位');
+    return;
+  }
+  
+  if (editingProductId) {
+    const index = products.findIndex(p => Number(p.id) === Number(editingProductId));
+    if (index !== -1) {
+      products[index] = { ...products[index], image, name, description, price, stock };
+    }
+    showToast(`✅ 已更新「${name}」`, 'success');
+  } else {
+    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    products.push({ id: newId, image, name, description, price, stock });
+    showToast(`✅ 已新增「${name}」`, 'success');
+  }
+  
+  // 儲存到 localStorage
+  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
+  
+  // 重新渲染
+  renderAdminProducts();
+  renderFeaturedProducts();
+  if (productsContainer) renderProducts();
+  
+  closeModal();
+}
+
+// 刪除商品
+function deleteProduct(id) {
+  if (!confirm('確定要刪除此商品嗎？')) return;
+  
+  products = products.filter(p => Number(p.id) !== Number(id));
+  
+  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
+  
+  renderAdminProducts();
+  renderFeaturedProducts();
+  if (productsContainer) renderProducts();
+  
+  showToast('🗑️ 商品已刪除', 'info');
+}
+
+// 修改 switchPage 函數，加入管理員頁面
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId + 'Page').classList.add('active');
+  
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelector(`[data-page="${pageId}"]`)?.classList.add('active');
+  
+  if (pageId === 'shop') renderProducts();
+  if (pageId === 'dashboard') renderFeaturedProducts();
+  if (pageId === 'admin') renderAdminProducts();
+}
+
+// 在 bindEvents 中添加管理員按鈕事件
+document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
+
       init();
   
   })();
