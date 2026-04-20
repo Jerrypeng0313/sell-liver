@@ -3241,20 +3241,34 @@ clearImageBtn?.addEventListener('click', () => {
   clearImageBtn.style.display = 'none';
 });
 
-// 開啟新增商品模態框
 function openAdminAddModal() {
   editingProductId = null;
-  modalTitle.textContent = '➕ 新增商品';
-  document.getElementById('productName').value = '';
-  document.getElementById('productDescription').value = '';
-  document.getElementById('productPrice').value = '';
-  document.getElementById('productStock').value = '10';
+  
+  // 安全設定，避免元素不存在時報錯
+  const modalTitle = document.getElementById('modalTitle');
+  const productName = document.getElementById('productName');
+  const productDescription = document.getElementById('productDescription');
+  const productPrice = document.getElementById('productPrice');
+  const productStock = document.getElementById('productStock');
+  const imagePreview = document.getElementById('imagePreview');
+  const clearImageBtn = document.getElementById('clearImageBtn');
+  
+  if (modalTitle) modalTitle.textContent = '➕ 新增商品';
+  if (productName) productName.value = '';
+  if (productDescription) productDescription.value = '';
+  if (productPrice) productPrice.value = '';
+  if (productStock) productStock.value = '10';
+  
   currentImageData = '';
-  imagePreview.src = '';
-  imagePreview.style.fontSize = '40px';
-  imagePreview.textContent = '🖼️';
-  clearImageBtn.style.display = 'none';
-  productModal.classList.add('active');
+  if (imagePreview) {
+    imagePreview.src = '';
+    imagePreview.style.fontSize = '40px';
+    imagePreview.textContent = '🖼️';
+  }
+  if (clearImageBtn) clearImageBtn.style.display = 'none';
+  
+  const productModal = document.getElementById('productModal');
+  if (productModal) productModal.classList.add('active');
 }
 
 // 關閉模態框
