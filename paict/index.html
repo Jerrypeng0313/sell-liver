@@ -2381,7 +2381,7 @@
 }
 
 .admin-only.show {
-  display: flex !important;
+  display: block !important;
 }
 
 /* 管理員商品圖片預覽 */
@@ -3240,30 +3240,6 @@
         rankIdx = Math.floor(Math.random() * RANKS.length);
         updateDash();
         showToast('📊 數據已刷新', 'info');
-      }
-
-      function updateUIForLogin(user) {
-        if (user) {
-          const avatarUrl = user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=00c2ff&color=fff`;
-          authButtonContainer.innerHTML = `
-            <div class="user-profile" id="userProfileBtn">
-              <img src="${avatarUrl}" alt="${user.name}" class="user-avatar">
-              <span class="user-name">${user.name.split(' ')[0]}</span>
-            </div>
-          `;
-          
-          if (welcomeBanner) {
-            welcomeBanner.style.display = 'block';
-            if (displayUserName) displayUserName.textContent = user.name;
-            if (loginMethodBadge) loginMethodBadge.textContent = user.loginMethod === 'google' ? '(Google)' : '(Email)';
-          }
-          
-          document.getElementById('userProfileBtn')?.addEventListener('click', showUserMenu);
-        } else {
-          authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
-          document.getElementById('showAuthBtn')?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
-          if (welcomeBanner) welcomeBanner.style.display = 'none';
-        }
       }
 
       // ========== 顯示用戶選單 (新版：包含設置入口) ==========
