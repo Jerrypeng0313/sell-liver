@@ -4120,21 +4120,46 @@ function performGoogleLinking() {
         if(resendCodeBtn) resendCodeBtn.disabled = true;
       }
 
-      function handleEmailLogin(email, password) {
-        loginError.classList.remove('show');
-        if(!email||!password){ loginError.textContent='請輸入電子郵件和密碼'; loginError.classList.add('show'); return false; }
-        if(!isValidGmail(email)){ loginError.textContent='⚠️ 僅支援 Gmail'; loginError.classList.add('show'); return false; }
-        const user = findUserByEmail(email);
-        if(!user){ loginError.textContent='帳號不存在'; loginError.classList.add('show'); return false; }
-        if(user.password !== password){ loginError.textContent='密碼錯誤'; loginError.classList.add('show'); return false; }
-        const loggedUser = { email:user.email, name:user.name, picture:`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=00c2ff&color=fff`, loginMethod:'email' };
-        currentUser = loggedUser;
-        localStorage.setItem('raceUIUser', JSON.stringify(loggedUser));
-        updateUIForLogin(loggedUser);
-        closeModal();
-        showToast(`🏎️ 歡迎，${user.name}！`, 'success');
-        return true;
-      }
+ function handleEmailLogin(email, password) {
+  loginError.classList.remove('show');
+  if(!email||!password){ 
+    loginError.textContent='請輸入電子郵件和密碼'; 
+    loginError.classList.add('show'); 
+    return false; 
+  }
+  if(!isValidGmail(email)){ 
+    loginError.textContent='⚠️ 僅支援 Gmail'; 
+    loginError.classList.add('show'); 
+    return false; 
+  }
+  const user = findUserByEmail(email);
+  if(!user){ 
+    loginError.textContent='帳號不存在'; 
+    loginError.classList.add('show'); 
+    return false; 
+  }
+  if(user.password !== password){ 
+    loginError.textContent='密碼錯誤'; 
+    loginError.classList.add('show'); 
+    return false; 
+  }
+  
+  const loggedUser = { 
+    email:user.email, 
+    name:user.name, 
+    picture:`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=00c2ff&color=fff`, 
+    loginMethod:'email' 
+  };
+  currentUser = loggedUser;
+  localStorage.setItem('raceUIUser', JSON.stringify(loggedUser));
+  updateUIForLogin(loggedUser);
+  
+  // ✅ 確認有這一行
+  closeModal();
+  
+  showToast(`🏎️ 歡迎，${user.name}！`, 'success');
+  return true;
+}
 
       async function handleSendVerificationCode() {
         registerError.classList.remove('show');
@@ -4189,55 +4214,49 @@ function performGoogleLinking() {
 function handleCredentialResponse(response) {
   console.log('🔐 Google 登入回應 received');
   try {
-      if (!response || !response.credential) {
-          console.error('❌ 沒有收到憑證');
-          showToast('❌ 登入失敗，請重試', 'error');
-          return;
-      }
-      
-      const base64Url = response.credential.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-      const payload = JSON.parse(jsonPayload);
-      
-      console.log('👤 使用者資訊:', payload);
-      
-      // 檢查是否有綁定此 Google 帳號的 Email 用戶
-      const users = getUsers();
-      const linkedUser = users.find(u => u.linkedGoogle && u.googleEmail === payload.email);
-      
-      let user;
-      if (linkedUser) {
-          // 使用已綁定的 Email 帳號登入
-          user = {
-              email: linkedUser.email,
-              name: linkedUser.name,
-              picture: linkedUser.picture || payload.picture,
-              loginMethod: 'email',
-              linkedGoogle: true,
-              googleEmail: payload.email
-          };
-          showToast(`✅ 使用綁定帳號登入！歡迎，${user.name}！`, 'success');
-      } else {
-          // 一般 Google 登入
-          user = { 
-              email: payload.email, 
-              name: payload.name, 
-              picture: payload.picture, 
-              loginMethod: 'google',
-              linkedGoogle: true
-          };
-          showToast(`✅ Google 登入成功！歡迎，${user.name}！`, 'success');
-      }
-      
-      currentUser = user;
-      localStorage.setItem('raceUIUser', JSON.stringify(user));
-      updateUIForLogin(user);
-      closeModal();
-      
+    const base64Url = response.credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    const payload = JSON.parse(jsonPayload);
+    
+    console.log('👤 使用者資訊:', payload);
+    
+    // 檢查是否有綁定此 Google 帳號的 Email 用戶
+    const users = getUsers();
+    const linkedUser = users.find(u => u.linkedGoogle && u.googleEmail === payload.email);
+    
+    let user;
+    if (linkedUser) {
+        // 使用已綁定的 Email 帳號登入
+        user = {
+            email: linkedUser.email,
+            name: linkedUser.name,
+            picture: linkedUser.picture || payload.picture,
+            loginMethod: 'email',
+            linkedGoogle: true,
+            googleEmail: payload.email
+        };
+        showToast(`✅ 使用綁定帳號登入！歡迎，${user.name}！`, 'success');
+    } else {
+        // 一般 Google 登入
+        user = { 
+            email: payload.email, 
+            name: payload.name, 
+            picture: payload.picture, 
+            loginMethod: 'google',
+            linkedGoogle: true
+        };
+        showToast(`✅ Google 登入成功！歡迎，${user.name}！`, 'success');
+    }
+    
+    currentUser = user;
+    localStorage.setItem('raceUIUser', JSON.stringify(user));
+    updateUIForLogin(user);
+    closeModal();
+    
   } catch (e) {
-      console.error('❌ 解析失敗:', e);
-      showToast('❌ 登入失敗，請重試', 'error');
+    console.error('❌ 解析失敗:', e);
+    showToast('❌ 登入失敗，請重試', 'error');
   }
 }
 
@@ -4306,7 +4325,12 @@ function handleCredentialResponse(response) {
       }
 
       function openModal() { modal.classList.add('active'); setActiveTab('login'); resetRegistrationForm(); }
-      function closeModal() { modal.classList.remove('active'); }
+      function closeModal() { 
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+          authModal.classList.remove('active');
+        }
+      }
       
       function setActiveTab(tabId) {
         tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
@@ -4672,11 +4696,6 @@ function openAdminEditModal(id) {
   setPreviewImage(product.image);
   
   if (productModal) productModal.classList.add('active');
-}
-
-function closeModal() {
-  if (productModal) productModal.classList.remove('active');
-  editingProductId = null;
 }
 
 // 在 bindEvents 中添加管理員按鈕事件 - 已移至 bindEvents 函數內
