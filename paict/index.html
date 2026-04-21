@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script> -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script> -->
   <style>
     /* ========== 核心变量 ========== */
     :root {
@@ -3163,41 +3163,30 @@ const GOOGLE_CLIENT_ID = '1015579088204-4bhr0d5i8jslurguo0l2d8pes50507jf.apps.go
 emailjs.init(EMAILJS_PUBLIC_KEY);
 console.log('✅ EmailJS 已初始化');
 
-// ========== Firebase 配置 ==========
-const firebaseConfig = {
-  apiKey: "AIzaSyBMvAWmGA1FgPdqpWW1HhlgiPyrm4wY9xo",
-  authDomain: "sell-liver.firebaseapp.com",
-  projectId: "sell-liver",
-  storageBucket: "sell-liver.firebasestorage.app",
-  messagingSenderId: "676999558140",
-  appId: "1:676999558140:web:169973d362b5df8a73f879"
-};
-
-// 初始化 Firebase
-firebase.initializeApp(firebaseConfig);
-
-// 重要：指定資料庫 ID 為 sell-liver-db
-const db = firebase.firestore(firebase.app(), 'sell-liver-db');
-console.log('✅ Firebase 已初始化，資料庫 ID:', 'sell-liver-db');  
-
-// ========== 商品數據（從 Firebase 讀取，所有人共用） ==========
+// ========== 商品數據（localStorage 版本，簡單穩定） ==========
 let products = [];
 
-// 從 Firebase 載入商品
-async function loadProducts() {
-  console.log('📦 從 Firebase 載入商品...');
-  try {
-    const snapshot = await db.collection('products').get();
-    products = snapshot.docs.map(doc => ({ id: Number(doc.id), ...doc.data() }));
-    console.log('✅ 成功載入', products.length, '件商品');
-    
-    if (products.length === 0) {
-      await setDefaultProductsToFirebase();
+// 從 localStorage 載入商品
+function loadProducts() {
+  console.log('📦 從 localStorage 載入商品...');
+  
+  let stored = localStorage.getItem('raceAdminProducts');
+  if (!stored) {
+    stored = localStorage.getItem('raceShopProducts');
+  }
+  
+  if (stored) {
+    try {
+      products = JSON.parse(stored);
+      products = products.map(p => ({ ...p, id: Number(p.id) }));
+      console.log('✅ 成功載入', products.length, '件商品');
+    } catch (e) {
+      console.error('❌ 解析失敗，使用預設值');
+      setDefaultProducts();
     }
-  } catch (error) {
-    console.error('❌ Firebase 連線失敗:', error);
-    const stored = localStorage.getItem('raceShopProducts');
-    products = stored ? JSON.parse(stored) : [];
+  } else {
+    console.log('📝 無儲存資料，使用預設值');
+    setDefaultProducts();
   }
   
   renderFeaturedProducts();
@@ -3205,9 +3194,8 @@ async function loadProducts() {
   if (adminProductsTableBody) renderAdminProducts();
 }
 
-// 寫入預設商品到 Firebase
-async function setDefaultProductsToFirebase() {
-  const defaultProducts = [
+function setDefaultProducts() {
+  products = [
     { id: 1, name: '霓虹賽車手套', price: 1290, image: '🧤', description: '專業級賽車手套，防滑透氣', stock: 25 },
     { id: 2, name: '碳纖維安全帽', price: 8990, image: '⛑️', description: '輕量化碳纖維，霓虹藍塗裝', stock: 12 },
     { id: 3, name: '競速賽車服', price: 4590, image: '👕', description: '防火材質，紅藍漸層設計', stock: 18 },
@@ -3215,52 +3203,8 @@ async function setDefaultProductsToFirebase() {
     { id: 5, name: 'RACE 連帽外套', price: 1890, image: '🧥', description: '限量版霓虹刺繡外套', stock: 22 },
     { id: 6, name: '鈦合金排氣管', price: 12900, image: '🔧', description: '高性能改裝排氣管', stock: 5 }
   ];
-  
-  for (const p of defaultProducts) {
-    await db.collection('products').doc(String(p.id)).set(p);
-  }
-  products = defaultProducts;
-}
-
-// 儲存商品到 Firebase
-async function saveProduct(product) {
-  try {
-    await db.collection('products').doc(String(product.id)).set(product);
-    console.log('✅ 商品已儲存到 Firebase');
-    return true;
-  } catch (error) {
-    console.error('❌ 儲存失敗:', error);
-    return false;
-  }
-}
-
-// 新增商品到 Firebase
-async function addProductToFirebase(product) {
-  try {
-    const snapshot = await db.collection('products').orderBy('id', 'desc').limit(1).get();
-    const maxId = snapshot.empty ? 0 : snapshot.docs[0].data().id;
-    const newId = maxId + 1;
-    product.id = newId;
-    await db.collection('products').doc(String(newId)).set(product);
-    products.push(product);
-    console.log('✅ 商品已新增到 Firebase');
-    return true;
-  } catch (error) {
-    console.error('❌ 新增失敗:', error);
-    return false;
-  }
-}
-
-// 刪除商品從 Firebase
-async function deleteProductFromFirebase(id) {
-  try {
-    await db.collection('products').doc(String(id)).delete();
-    console.log('✅ 商品已從 Firebase 刪除');
-    return true;
-  } catch (error) {
-    console.error('❌ 刪除失敗:', error);
-    return false;
-  }
+  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
 }
 
 // 管理員商品編輯狀態
@@ -3365,11 +3309,11 @@ productModal?.addEventListener('click', (e) => {
   if (e.target === productModal) closeModal();
 });
 
-// 綁定新增商品按鈕
-document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+// 綁定新增商品按鈕 - 已移至 bindEvents 函數內
+// document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
 
-// 儲存商品按鈕事件
-saveProductBtn?.addEventListener('click', saveAdminProduct);
+// 儲存商品按鈕事件 - 已移至 bindEvents 函數內
+// saveProductBtn?.addEventListener('click', saveAdminProduct);
 
       // ========== 購物車 ==========
       let cart = JSON.parse(localStorage.getItem('raceCart') || '[]');
@@ -4580,12 +4524,12 @@ function closeModal() {
   editingProductId = null;
 }
 
-// 儲存商品
-async function saveAdminProduct() {
-  const name = productName?.value.trim() || '';
-  const description = productDescription?.value.trim() || '';
-  const price = parseInt(productPrice?.value) || 0;
-  const stock = parseInt(productStock?.value) || 0;
+// 儲存商品（localStorage 版本）
+function saveAdminProduct() {
+  const name = document.getElementById('productName')?.value.trim() || '';
+  const description = document.getElementById('productDescription')?.value.trim() || '';
+  const price = parseInt(document.getElementById('productPrice')?.value) || 0;
+  const stock = parseInt(document.getElementById('productStock')?.value) || 0;
   
   let image = currentImageData;
   if (!image) image = '📦';
@@ -4601,16 +4545,17 @@ async function saveAdminProduct() {
     productData.id = editingProductId;
     const index = products.findIndex(p => Number(p.id) === Number(editingProductId));
     if (index !== -1) products[index] = productData;
-    
-    // 同步到 Firebase
-    await saveProduct(productData);
-    
     showToast(`✅ 已更新「${name}」`, 'success');
   } else {
-    // 新增到 Firebase
-    await addProductToFirebase(productData);
+    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    productData.id = newId;
+    products.push(productData);
     showToast(`✅ 已新增「${name}」`, 'success');
   }
+  
+  // 儲存到 localStorage
+  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
   // 重新渲染
   renderAdminProducts();
@@ -4620,12 +4565,14 @@ async function saveAdminProduct() {
   closeModal();
 }
 
-// 刪除商品
-async function deleteProduct(id) {
+// 刪除商品（localStorage 版本）
+function deleteProduct(id) {
   if (!confirm('確定要刪除此商品嗎？')) return;
   
-  await deleteProductFromFirebase(id);
   products = products.filter(p => Number(p.id) !== Number(id));
+  
+  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
   renderAdminProducts();
   renderFeaturedProducts();
@@ -4647,9 +4594,9 @@ function switchPage(pageId) {
   if (pageId === 'admin') renderAdminProducts();
 }
 
-// 在 bindEvents 中添加管理員按鈕事件
-document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
-document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
+// 在 bindEvents 中添加管理員按鈕事件 - 已移至 bindEvents 函數內
+// document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+// document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
 
       init();
   
