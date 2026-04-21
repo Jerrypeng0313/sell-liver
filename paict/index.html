@@ -3237,7 +3237,7 @@ async function saveAdminProduct() {
   const price = parseInt(document.getElementById('productPrice')?.value) || 0;
   
   if (!name || !price) {
-    alert('請填寫商品名稱和價格');
+    showToast('❌ 請填寫商品名稱和價格', 'error');
     return;
   }
   
@@ -3270,6 +3270,7 @@ async function saveAdminProduct() {
 // 刪除商品
 async function deleteProduct(id) {
   if (!confirm('確定要刪除嗎？')) return;
+showToast('🗑️ 商品已刪除', 'info');
   
   products = products.filter(p => p.id !== id);
   
@@ -4617,115 +4618,5 @@ function closeModal() {
   
   })();
     </script>
-<script>
-  // 緊急修復：手動綁定儲存按鈕（修正版）
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-      const saveBtn = document.getElementById('saveProductBtn');
-      const addBtn = document.getElementById('addProductBtn');
-      const closeBtn = document.getElementById('closeProductModal');
-      const cancelBtn = document.getElementById('cancelModalBtn');
-      const modal = document.getElementById('productModal');
-      
-      console.log('🔧 手動綁定按鈕事件');
-      
-      // 確保有 products 變數，如果沒有就建立一個
-      if (typeof products === 'undefined') {
-        window.products = [];
-        console.log('📦 建立 products 陣列');
-      }
-      
-      // 儲存按鈕
-      if (saveBtn) {
-        saveBtn.onclick = function() {
-          console.log('✅ 儲存按鈕被點擊了！');
-          
-          const name = document.getElementById('productName')?.value || '';
-          const description = document.getElementById('productDescription')?.value || '';
-          const price = document.getElementById('productPrice')?.value || '';
-          const stock = document.getElementById('productStock')?.value || '10';
-          
-          if (!name || !price) {
-            alert('請填寫商品名稱和價格');
-            return;
-          }
-          
-          // 使用 window.products 或 products
-          const productList = window.products || products || [];
-          
-          // 新增商品
-          const newId = productList.length > 0 ? Math.max(...productList.map(p => p.id)) + 1 : 1;
-          const newProduct = {
-            id: newId,
-            name: name,
-            description: description,
-            price: parseInt(price),
-            stock: parseInt(stock),
-            image: window.currentImageData || '📦'
-          };
-          
-          productList.push(newProduct);
-          
-          // 儲存到 localStorage
-          localStorage.setItem('raceAdminProducts', JSON.stringify(productList));
-          localStorage.setItem('raceShopProducts', JSON.stringify(productList));
-          
-          // 同步到全域變數
-          window.products = productList;
-          
-          // 關閉模態框
-          if (modal) modal.classList.remove('active');
-          
-          alert('✅ 商品已新增！重整頁面即可看到。');
-          
-          // 重新整理頁面
-          setTimeout(() => location.reload(), 500);
-        };
-      }
-      
-      // 新增按鈕
-      if (addBtn) {
-        addBtn.onclick = function() {
-          console.log('✅ 新增按鈕被點擊了！');
-          if (modal) {
-            modal.classList.add('active');
-            const title = document.getElementById('modalTitle');
-            if (title) title.textContent = '➕ 新增商品';
-            const nameInput = document.getElementById('productName');
-            if (nameInput) nameInput.value = '';
-            const descInput = document.getElementById('productDescription');
-            if (descInput) descInput.value = '';
-            const priceInput = document.getElementById('productPrice');
-            if (priceInput) priceInput.value = '';
-            const stockInput = document.getElementById('productStock');
-            if (stockInput) stockInput.value = '10';
-          }
-        };
-      }
-      
-      // 關閉按鈕
-      if (closeBtn) {
-        closeBtn.onclick = function() {
-          if (modal) modal.classList.remove('active');
-        };
-      }
-      
-      // 取消按鈕
-      if (cancelBtn) {
-        cancelBtn.onclick = function() {
-          if (modal) modal.classList.remove('active');
-        };
-      }
-      
-      // 點擊背景關閉
-      if (modal) {
-        modal.onclick = function(e) {
-          if (e.target === modal) modal.classList.remove('active');
-        };
-      }
-      
-    }, 1000);
-  });
-</script>
 </body>
 </html>
