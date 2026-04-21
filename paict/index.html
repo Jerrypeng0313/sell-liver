@@ -4602,5 +4602,102 @@ function switchPage(pageId) {
   
   })();
     </script>
+<script>
+  // 緊急修復：手動綁定儲存按鈕
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      const saveBtn = document.getElementById('saveProductBtn');
+      const addBtn = document.getElementById('addProductBtn');
+      const closeBtn = document.getElementById('closeProductModal');
+      const cancelBtn = document.getElementById('cancelModalBtn');
+      const modal = document.getElementById('productModal');
+      
+      console.log('🔧 手動綁定按鈕事件');
+      console.log('儲存按鈕:', saveBtn);
+      console.log('新增按鈕:', addBtn);
+      
+      // 儲存按鈕
+      if (saveBtn) {
+        saveBtn.onclick = function() {
+          console.log('✅ 儲存按鈕被點擊了！');
+          
+          const name = document.getElementById('productName')?.value || '';
+          const description = document.getElementById('productDescription')?.value || '';
+          const price = document.getElementById('productPrice')?.value || '';
+          const stock = document.getElementById('productStock')?.value || '10';
+          
+          if (!name || !price) {
+            alert('請填寫商品名稱和價格');
+            return;
+          }
+          
+          // 新增商品到 products 陣列
+          const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+          const newProduct = {
+            id: newId,
+            name: name,
+            description: description,
+            price: parseInt(price),
+            stock: parseInt(stock),
+            image: currentImageData || '📦'
+          };
+          
+          products.push(newProduct);
+          
+          // 儲存到 localStorage
+          localStorage.setItem('raceAdminProducts', JSON.stringify(products));
+          localStorage.setItem('raceShopProducts', JSON.stringify(products));
+          
+          // 關閉模態框
+          if (modal) modal.classList.remove('active');
+          
+          // 重新渲染
+          if (typeof renderAdminProducts === 'function') renderAdminProducts();
+          if (typeof renderFeaturedProducts === 'function') renderFeaturedProducts();
+          if (typeof renderProducts === 'function') renderProducts();
+          
+          alert('✅ 商品已新增！');
+        };
+      }
+      
+      // 新增按鈕
+      if (addBtn) {
+        addBtn.onclick = function() {
+          console.log('✅ 新增按鈕被點擊了！');
+          if (modal) {
+            modal.classList.add('active');
+            document.getElementById('modalTitle').textContent = '➕ 新增商品';
+            document.getElementById('productName').value = '';
+            document.getElementById('productDescription').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productStock').value = '10';
+          }
+        };
+      }
+      
+      // 關閉按鈕
+      if (closeBtn) {
+        closeBtn.onclick = function() {
+          if (modal) modal.classList.remove('active');
+        };
+      }
+      
+      // 取消按鈕
+      if (cancelBtn) {
+        cancelBtn.onclick = function() {
+          if (modal) modal.classList.remove('active');
+        };
+      }
+      
+      // 點擊背景關閉
+      if (modal) {
+        modal.onclick = function(e) {
+          if (e.target === modal) modal.classList.remove('active');
+        };
+      }
+      
+    }, 1000); // 等待 1 秒確保其他程式碼載入完成
+  });
+</script>
 </body>
 </html>
