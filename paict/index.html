@@ -3175,7 +3175,7 @@ const firebaseConfig = {
 
 // 初始化 Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db = firebase.firestore(firebase.app(), 'sell-liver-db');  
 
 // ========== 商品數據（從 Firebase 讀取，所有人共用） ==========
 let products = [];
