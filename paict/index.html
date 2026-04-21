@@ -143,6 +143,18 @@
   box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
 }
 
+.logo-image {
+  height: 45px;  /* 調整高度 */
+  width: auto;   /* 寬度自動依比例 */
+  display: block;
+  filter: drop-shadow(0 0 15px rgba(255, 59, 92, 0.5));  /* 霓虹光暈效果 */
+  transition: filter 0.3s ease;
+}
+
+.logo-image:hover {
+  filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.7));  /* 懸停時更亮 */
+}
+
 .logo span:last-child {
   background: linear-gradient(135deg, #FFD700, #ff3b5c);
   -webkit-background-clip: text;
@@ -2614,8 +2626,8 @@
   <header class="navbar">
     <div class="container nav-inner">
 <div class="logo">
-  <span class="logo-mark">💼</span>
-  <span>賣肝人生</span>
+  <img src="logo.png" alt="賣肝人生" class="logo-image">
+  <span class="logo-text">賣肝人生</span>
 </div>
  <nav class="nav-links">
   <a class="nav-link active" data-page="dashboard">🏠 首頁</a>
