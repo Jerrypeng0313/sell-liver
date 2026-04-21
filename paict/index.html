@@ -3166,50 +3166,50 @@ const JSONBIN_BIN_ID = '69e724e936566621a8d624f2';      // ← 請替換為您�
 const JSONBIN_API_KEY = '$2a$10$pnKDz7Q8DZeK0kMNrHh98.MYVmVZibSZtrsu9Ncdh7OBuPcnJ..SW';    // ← 請替換為您的 API Key
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
-// ========== 商品数据（带缓存优化） ==========
+// ========== 商品數據（非阻塞版本） ==========
 let products = [];
 
-async function loadProducts() {
-  console.log('📦 载入商品...');
+function loadProducts() {
+  console.log('📦 載入商品...');
   
-  // 1. 先从 localStorage 读取缓存（瞬间显示）
+  // 1. 先從 localStorage 讀取快取（瞬間顯示上次的資料）
   const cached = localStorage.getItem('raceShopProducts');
   if (cached) {
     try {
       products = JSON.parse(cached);
-      console.log('⚡ 从缓存载入', products.length, '件商品');
-      renderFeaturedProducts();
-      if (productsContainer) renderProducts();
-      if (adminProductsTableBody) renderAdminProducts();
+      console.log('⚡ 從快取載入', products.length, '件商品');
     } catch (e) {
-      console.error('缓存读取失败');
-    }
-  } else {
-    // 没有缓存时显示骨架屏
-    if (productsContainer) {
-      productsContainer.innerHTML = '<div class="loading-skeleton" style="grid-column:1/-1;text-align:center;padding:40px;"><p>⏳ 载入商品中...</p></div>';
+      products = [];
     }
   }
   
-  // 2. 后台从 JSONBin 更新
-  try {
-    const response = await fetch(JSONBIN_URL, {
-      headers: { 'X-Master-Key': JSONBIN_API_KEY }
-    });
-    const data = await response.json();
-    products = data.record;
-    
-    // 更新缓存
-    localStorage.setItem('raceShopProducts', JSON.stringify(products));
-    console.log('✅ 从云端更新', products.length, '件商品');
-    
-    // 重新渲染
-    renderFeaturedProducts();
-    if (productsContainer) renderProducts();
-    if (adminProductsTableBody) renderAdminProducts();
-  } catch (error) {
-    console.error('❌ 云端更新失败:', error);
-  }
+  // 2. 立即渲染快取資料（不等待雲端）
+  renderFeaturedProducts();
+  if (productsContainer) renderProducts();
+  if (adminProductsTableBody) renderAdminProducts();
+  
+  // 3. 背景更新雲端資料（不阻塞）
+  fetch(JSONBIN_URL, {
+    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.record && data.record.length > 0) {
+      // 檢查資料是否有變化
+      const newProducts = data.record;
+      if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+        products = newProducts;
+        localStorage.setItem('raceShopProducts', JSON.stringify(products));
+        console.log('🔄 雲端資料已更新');
+        renderFeaturedProducts();
+        if (productsContainer) renderProducts();
+        if (adminProductsTableBody) renderAdminProducts();
+      }
+    }
+  })
+  .catch(error => {
+    console.log('⚠️ 雲端連線失敗，使用快取資料');
+  });
 }
 
 // 儲存商品到 JSONBin（管理員修改後）
