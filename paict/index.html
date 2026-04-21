@@ -3139,6 +3139,21 @@
     (function(){
       'use strict';
 
+// DOM 元素（模態框相關）- 請添加到變數宣告區
+const productModal = document.getElementById('productModal');
+const modalTitle = document.getElementById('modalTitle');
+const closeProductModal = document.getElementById('closeProductModal');
+const cancelModalBtn = document.getElementById('cancelModalBtn');
+const saveProductBtn = document.getElementById('saveProductBtn');
+const productImageInput = document.getElementById('productImageInput');
+const imagePreview = document.getElementById('imagePreview');
+const clearImageBtn = document.getElementById('clearImageBtn');
+const productName = document.getElementById('productName');
+const productDescription = document.getElementById('productDescription');
+const productPrice = document.getElementById('productPrice');
+const productStock = document.getElementById('productStock');
+const adminProductsTableBody = document.getElementById('adminProductsTableBody');
+
 // ========== 配置 ==========
 const EMAILJS_PUBLIC_KEY = '2S4HExotZb9QyOmiA';
 const EMAILJS_SERVICE_ID = 'service_8jwm8ve';
@@ -3463,6 +3478,7 @@ saveProductBtn?.addEventListener('click', saveAdminProduct);
         
         if (pageId === 'shop') renderProducts();
         if (pageId === 'dashboard') renderFeaturedProducts();
+        if (pageId === 'admin') renderAdminProducts();
       }
 
       function renderProducts() {
@@ -4279,6 +4295,42 @@ exitBtn?.addEventListener('click', () => {
 });
 
         refreshBtn?.addEventListener('click', randomizeDash);
+
+        // ========== 模態框事件綁定 ==========
+        // 新增商品按鈕
+        const addProductBtn = document.getElementById('addProductBtn');
+        if (addProductBtn) {
+          addProductBtn.addEventListener('click', openAdminAddModal);
+        }
+
+        // 關閉模態框（X 按鈕）
+        if (closeProductModal) {
+          closeProductModal.addEventListener('click', closeModal);
+        }
+
+        // 取消按鈕
+        if (cancelModalBtn) {
+          cancelModalBtn.addEventListener('click', closeModal);
+        }
+
+        // 儲存按鈕
+        if (saveProductBtn) {
+          saveProductBtn.addEventListener('click', saveAdminProduct);
+        }
+
+        // 點擊背景關閉模態框
+        if (productModal) {
+          productModal.addEventListener('click', (e) => {
+            if (e.target === productModal) closeModal();
+          });
+        }
+
+        // ESC 鍵關閉模態框
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && productModal && productModal.classList.contains('active')) {
+            closeModal();
+          }
+        });
       }
 
       function init() {
@@ -4488,16 +4540,19 @@ function updateAdminStats() {
   document.getElementById('maxPrice').textContent = `NT$${maxPrice.toLocaleString()}`;
 }
 
-// 開啟新增商品模態框
+// ========== 模態框控制（修正版） ==========
 function openAdminAddModal() {
   editingProductId = null;
-  document.getElementById('modalTitle').textContent = '➕ 新增商品';
-  document.getElementById('productName').value = '';
-  document.getElementById('productDescription').value = '';
-  document.getElementById('productPrice').value = '';
-  document.getElementById('productStock').value = '10';
+  
+  if (modalTitle) modalTitle.textContent = '➕ 新增商品';
+  if (productName) productName.value = '';
+  if (productDescription) productDescription.value = '';
+  if (productPrice) productPrice.value = '';
+  if (productStock) productStock.value = '10';
+  
   clearImage();
-  productModal.classList.add('active');
+  
+  if (productModal) productModal.classList.add('active');
 }
 
 function openAdminEditModal(id) {
@@ -4505,12 +4560,6 @@ function openAdminEditModal(id) {
   if (!product) return;
   
   editingProductId = id;
-  
-  const modalTitle = document.getElementById('modalTitle');
-  const productName = document.getElementById('productName');
-  const productDescription = document.getElementById('productDescription');
-  const productPrice = document.getElementById('productPrice');
-  const productStock = document.getElementById('productStock');
   
   if (modalTitle) modalTitle.textContent = '✏️ 編輯商品';
   if (productName) productName.value = product.name;
@@ -4520,16 +4569,20 @@ function openAdminEditModal(id) {
   
   setPreviewImage(product.image);
   
-  const productModal = document.getElementById('productModal');
   if (productModal) productModal.classList.add('active');
 }
 
+function closeModal() {
+  if (productModal) productModal.classList.remove('active');
+  editingProductId = null;
+}
+
 // 儲存商品
-function saveAdminProduct() {
-  const name = document.getElementById('productName').value.trim();
-  const description = document.getElementById('productDescription').value.trim();
-  const price = parseInt(document.getElementById('productPrice').value);
-  const stock = parseInt(document.getElementById('productStock').value) || 0;
+async function saveAdminProduct() {
+  const name = productName?.value.trim() || '';
+  const description = productDescription?.value.trim() || '';
+  const price = parseInt(productPrice?.value) || 0;
+  const stock = parseInt(productStock?.value) || 0;
   
   let image = currentImageData;
   if (!image) image = '📦';
@@ -4539,21 +4592,22 @@ function saveAdminProduct() {
     return;
   }
   
+  const productData = { name, description, price, stock, image };
+  
   if (editingProductId) {
+    productData.id = editingProductId;
     const index = products.findIndex(p => Number(p.id) === Number(editingProductId));
-    if (index !== -1) {
-      products[index] = { ...products[index], image, name, description, price, stock };
-    }
+    if (index !== -1) products[index] = productData;
+    
+    // 同步到 Firebase
+    await saveProduct(productData);
+    
     showToast(`✅ 已更新「${name}」`, 'success');
   } else {
-    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ id: newId, image, name, description, price, stock });
+    // 新增到 Firebase
+    await addProductToFirebase(productData);
     showToast(`✅ 已新增「${name}」`, 'success');
   }
-  
-  // 儲存到 localStorage
-  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
-  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
   // 重新渲染
   renderAdminProducts();
@@ -4564,13 +4618,11 @@ function saveAdminProduct() {
 }
 
 // 刪除商品
-function deleteProduct(id) {
+async function deleteProduct(id) {
   if (!confirm('確定要刪除此商品嗎？')) return;
   
+  await deleteProductFromFirebase(id);
   products = products.filter(p => Number(p.id) !== Number(id));
-  
-  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
-  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
   renderAdminProducts();
   renderFeaturedProducts();
