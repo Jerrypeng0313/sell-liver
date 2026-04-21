@@ -3439,9 +3439,9 @@ function openAdminAddModal() {
 }
 
 // 關閉模態框
-function closeModal() {
-  productModal.classList.remove('active');
-  editingProductId = null;
+function closeAuthModal() {
+  const authModal = document.getElementById('authModal');
+  if (authModal) authModal.classList.remove('active');
 }
 
 // 綁定模態框事件
@@ -3452,7 +3452,7 @@ productModal?.addEventListener('click', (e) => {
 });
 
 // 綁定新增商品按鈕 - 已移至 bindEvents 函數內
-// document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+//document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
 
 // 儲存商品按鈕事件 - 已移至 bindEvents 函數內
 // saveProductBtn?.addEventListener('click', saveAdminProduct);
@@ -4353,8 +4353,21 @@ function handleCredentialResponse(response) {
         });
 
         document.addEventListener('click', (e) => { if(e.target.id==='showAuthBtn'||e.target.closest('#showAuthBtn')){ e.preventDefault(); openModal(); } });
-        document.getElementById('closeAuthBtn')?.addEventListener('click', closeModal);
-        modal?.addEventListener('click', (e) => { if(e.target===modal) closeModal(); });
+        const closeAuthBtn = document.getElementById('closeAuthBtn');
+if (closeAuthBtn) {
+  closeAuthBtn.addEventListener('click', () => {
+    const authModal = document.getElementById('authModal');
+    if (authModal) authModal.classList.remove('active');
+  });
+}
+        const authModal = document.getElementById('authModal');
+if (authModal) {
+  authModal.addEventListener('click', (e) => {
+    if (e.target === authModal) {
+      authModal.classList.remove('active');
+    }
+  });
+}
         
         tabs.forEach(t => t.addEventListener('click', () => setActiveTab(t.dataset.tab)));
         document.getElementById('switchToRegister')?.addEventListener('click', () => setActiveTab('register'));
