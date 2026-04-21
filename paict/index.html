@@ -3212,10 +3212,10 @@ function loadProducts() {
   });
 }
 
-// 儲存商品到 JSONBin（管理員修改後）
+// 儲存到 JSONBin（背景同步）
 async function saveToJSONBin() {
   try {
-    await fetch(JSONBIN_URL, {
+    const response = await fetch(JSONBIN_URL, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -3223,15 +3223,20 @@ async function saveToJSONBin() {
       },
       body: JSON.stringify(products)
     });
-    console.log('✅ 已同步到雲端');
-    return true;
+    
+    if (response.ok) {
+      console.log('✅ 已同步到雲端');
+      return true;
+    } else {
+      throw new Error('雲端回應錯誤');
+    }
   } catch (error) {
     console.error('❌ 同步失敗:', error);
     return false;
   }
 }
 
-// 儲存商品（管理員用）
+// 儲存商品（管理員用，瞬間完成）
 async function saveAdminProduct() {
   const name = document.getElementById('productName')?.value.trim() || '';
   const price = parseInt(document.getElementById('productPrice')?.value) || 0;
@@ -3241,6 +3246,7 @@ async function saveAdminProduct() {
     return;
   }
   
+  // 1. 先立即更新本地資料（瞬間完成）
   const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
   const product = {
     id: newId,
@@ -3253,35 +3259,45 @@ async function saveAdminProduct() {
   
   products.push(product);
   
-  // 儲存到 JSONBin
-  const success = await saveToJSONBin();
+  // 2. 立即儲存到 localStorage 快取
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
-  if (success) {
-    renderAdminProducts();
-    renderFeaturedProducts();
-    if (productsContainer) renderProducts();
-    closeModal();
-    showToast('✅ 商品已新增到雲端！', 'success');
-  } else {
-    showToast('❌ 儲存失敗，請檢查網路', 'error');
-  }
+  // 3. 立即關閉模態框並重新渲染（使用者看到瞬間完成）
+  closeModal();
+  renderAdminProducts();
+  renderFeaturedProducts();
+  if (productsContainer) renderProducts();
+  showToast('✅ 商品已新增！', 'success');
+  
+  // 4. 背景同步到 JSONBin（不影響使用者操作）
+  saveToJSONBin().catch(err => {
+    console.warn('⚠️ 雲端同步延遲，將在背景重試');
+    // 失敗時排程重試
+    setTimeout(() => saveToJSONBin(), 3000);
+  });
 }
 
-// 刪除商品
+// 刪除商品（瞬間完成）
 async function deleteProduct(id) {
   if (!confirm('確定要刪除嗎？')) return;
-showToast('🗑️ 商品已刪除', 'info');
   
+  // 1. 先立即從本地資料刪除（瞬間完成）
   products = products.filter(p => p.id !== id);
   
-  const success = await saveToJSONBin();
+  // 2. 立即儲存到 localStorage 快取
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
-  if (success) {
-    renderAdminProducts();
-    renderFeaturedProducts();
-    if (productsContainer) renderProducts();
-    showToast('🗑️ 商品已刪除', 'info');
-  }
+  // 3. 立即重新渲染（使用者看到瞬間完成）
+  renderAdminProducts();
+  renderFeaturedProducts();
+  if (productsContainer) renderProducts();
+  showToast('🗑️ 商品已刪除', 'info');
+  
+  // 4. 背景同步到 JSONBin（不影響使用者操作）
+  saveToJSONBin().catch(err => {
+    console.warn('⚠️ 雲端同步延遲，將在背景重試');
+    setTimeout(() => saveToJSONBin(), 3000);
+  });
 }
 
 // 編輯商品（如果需要）
