@@ -3175,7 +3175,10 @@ const firebaseConfig = {
 
 // 初始化 Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(firebase.app(), 'sell-liver-db');  
+
+// 重要：指定資料庫 ID 為 sell-liver-db
+const db = firebase.firestore(firebase.app(), 'sell-liver-db');
+console.log('✅ Firebase 已初始化，資料庫 ID:', 'sell-liver-db');  
 
 // ========== 商品數據（從 Firebase 讀取，所有人共用） ==========
 let products = [];
