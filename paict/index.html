@@ -12,8 +12,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
     /* ========== 核心变量 ========== */
     :root {
@@ -3163,36 +3161,27 @@ const GOOGLE_CLIENT_ID = '1015579088204-4bhr0d5i8jslurguo0l2d8pes50507jf.apps.go
 emailjs.init(EMAILJS_PUBLIC_KEY);
 console.log('✅ EmailJS 已初始化');
 
-// ========== Firebase 最簡化設定 ==========
-const firebaseConfig = {
-  apiKey: "AIzaSyBMvAWmGA1FgPdqpWW1HhlgiPyrm4wY9xo",
-  authDomain: "sell-liver.firebaseapp.com",
-  projectId: "sell-liver",
-  storageBucket: "sell-liver.firebasestorage.app",
-  messagingSenderId: "676999558140",
-  appId: "1:676999558140:web:169973d362b5df8a73f879"
-};
-
-// 初始化
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// ========== JSONBin.io 配置 ==========
+const JSONBIN_BIN_ID = '69e724e936566621a8d624f2';      // ← 請替換為您的 Bin ID
+const JSONBIN_API_KEY = '$2a$10$pnKDz7Q8DZeK0kMNrHh98.MYVmVZibSZtrsu9Ncdh7OBuPcnJ..SW';    // ← 請替換為您的 API Key
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 // ========== 商品數據 ==========
 let products = [];
 
-// 載入商品
+// 從 JSONBin 載入商品（所有人共用）
 async function loadProducts() {
-  console.log('📦 從 Firebase 載入商品...');
+  console.log('📦 從 JSONBin 載入商品...');
   try {
-    const snapshot = await db.collection('products').get();
-    products = snapshot.docs.map(doc => ({ id: Number(doc.id), ...doc.data() }));
+    const response = await fetch(JSONBIN_URL, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    const data = await response.json();
+    products = data.record;
     console.log('✅ 成功載入', products.length, '件商品');
-    
-    if (products.length === 0) {
-      await setDefaultProducts();
-    }
   } catch (error) {
     console.error('❌ 載入失敗:', error);
+    products = [];
   }
   
   renderFeaturedProducts();
@@ -3200,19 +3189,84 @@ async function loadProducts() {
   if (adminProductsTableBody) renderAdminProducts();
 }
 
-// 預設商品
-async function setDefaultProducts() {
-  const defaults = [
-    { id: 1, name: '霓虹賽車手套', price: 1290, image: '🧤', description: '專業級賽車手套', stock: 25 },
-    { id: 2, name: '碳纖維安全帽', price: 8990, image: '⛑️', description: '輕量化碳纖維', stock: 12 },
-    { id: 3, name: '競速賽車服', price: 4590, image: '👕', description: '防火材質', stock: 18 },
-    { id: 4, name: '賽車鞋', price: 2890, image: '👟', description: '極致抓地力', stock: 30 }
-  ];
-  
-  for (const p of defaults) {
-    await db.collection('products').doc(String(p.id)).set(p);
+// 儲存商品到 JSONBin（管理員修改後）
+async function saveToJSONBin() {
+  try {
+    await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_API_KEY
+      },
+      body: JSON.stringify(products)
+    });
+    console.log('✅ 已同步到雲端');
+    return true;
+  } catch (error) {
+    console.error('❌ 同步失敗:', error);
+    return false;
   }
-  products = defaults;
+}
+
+// 儲存商品（管理員用）
+async function saveAdminProduct() {
+  const name = document.getElementById('productName')?.value.trim() || '';
+  const price = parseInt(document.getElementById('productPrice')?.value) || 0;
+  
+  if (!name || !price) {
+    alert('請填寫商品名稱和價格');
+    return;
+  }
+  
+  const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  const product = {
+    id: newId,
+    name: name,
+    description: document.getElementById('productDescription')?.value || '',
+    price: price,
+    stock: parseInt(document.getElementById('productStock')?.value) || 10,
+    image: currentImageData || '📦'
+  };
+  
+  products.push(product);
+  
+  // 儲存到 JSONBin
+  const success = await saveToJSONBin();
+  
+  if (success) {
+    renderAdminProducts();
+    renderFeaturedProducts();
+    if (productsContainer) renderProducts();
+    closeModal();
+    showToast('✅ 商品已新增到雲端！', 'success');
+  } else {
+    showToast('❌ 儲存失敗，請檢查網路', 'error');
+  }
+}
+
+// 刪除商品
+async function deleteProduct(id) {
+  if (!confirm('確定要刪除嗎？')) return;
+  
+  products = products.filter(p => p.id !== id);
+  
+  const success = await saveToJSONBin();
+  
+  if (success) {
+    renderAdminProducts();
+    renderFeaturedProducts();
+    if (productsContainer) renderProducts();
+    showToast('🗑️ 商品已刪除', 'info');
+  }
+}
+
+// 編輯商品（如果需要）
+async function updateProduct(id, updatedData) {
+  const index = products.findIndex(p => p.id === id);
+  if (index !== -1) {
+    products[index] = { ...products[index], ...updatedData };
+    await saveToJSONBin();
+  }
 }
 
 // 管理員商品編輯狀態
@@ -4530,66 +4584,6 @@ function openAdminEditModal(id) {
 function closeModal() {
   if (productModal) productModal.classList.remove('active');
   editingProductId = null;
-}
-
-// 儲存商品
-async function saveAdminProduct() {
-  const name = document.getElementById('productName')?.value.trim() || '';
-  const price = parseInt(document.getElementById('productPrice')?.value) || 0;
-  
-  if (!name || !price) {
-    alert('請填寫商品名稱和價格');
-    return;
-  }
-  
-  const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-  const product = {
-    id: newId,
-    name: name,
-    description: document.getElementById('productDescription')?.value || '',
-    price: price,
-    stock: parseInt(document.getElementById('productStock')?.value) || 10,
-    image: currentImageData || '📦'
-  };
-  
-  // 儲存到 Firebase
-  await db.collection('products').doc(String(newId)).set(product);
-  products.push(product);
-  
-  // 重新渲染
-  renderAdminProducts();
-  renderFeaturedProducts();
-  if (productsContainer) renderProducts();
-  
-  closeModal();
-  alert('✅ 商品已新增到雲端！');
-}
-
-// 刪除商品
-async function deleteProduct(id) {
-  if (!confirm('確定要刪除嗎？')) return;
-  
-  await db.collection('products').doc(String(id)).delete();
-  products = products.filter(p => p.id !== id);
-  
-  renderAdminProducts();
-  renderFeaturedProducts();
-  if (productsContainer) renderProducts();
-  
-  alert('🗑️ 商品已刪除');
-}
-
-// 修改 switchPage 函數，加入管理員頁面
-function switchPage(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(pageId + 'Page').classList.add('active');
-  
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.querySelector(`[data-page="${pageId}"]`)?.classList.add('active');
-  
-  if (pageId === 'shop') renderProducts();
-  if (pageId === 'dashboard') renderFeaturedProducts();
-  if (pageId === 'admin') renderAdminProducts();
 }
 
 // 在 bindEvents 中添加管理員按鈕事件 - 已移至 bindEvents 函數內
