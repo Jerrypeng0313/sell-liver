@@ -3166,27 +3166,50 @@ const JSONBIN_BIN_ID = '69e724e936566621a8d624f2';      // ← 請替換為您�
 const JSONBIN_API_KEY = '$2a$10$pnKDz7Q8DZeK0kMNrHh98.MYVmVZibSZtrsu9Ncdh7OBuPcnJ..SW';    // ← 請替換為您的 API Key
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
-// ========== 商品數據 ==========
+// ========== 商品数据（带缓存优化） ==========
 let products = [];
 
-// 從 JSONBin 載入商品（所有人共用）
 async function loadProducts() {
-  console.log('📦 從 JSONBin 載入商品...');
+  console.log('📦 载入商品...');
+  
+  // 1. 先从 localStorage 读取缓存（瞬间显示）
+  const cached = localStorage.getItem('raceShopProducts');
+  if (cached) {
+    try {
+      products = JSON.parse(cached);
+      console.log('⚡ 从缓存载入', products.length, '件商品');
+      renderFeaturedProducts();
+      if (productsContainer) renderProducts();
+      if (adminProductsTableBody) renderAdminProducts();
+    } catch (e) {
+      console.error('缓存读取失败');
+    }
+  } else {
+    // 没有缓存时显示骨架屏
+    if (productsContainer) {
+      productsContainer.innerHTML = '<div class="loading-skeleton" style="grid-column:1/-1;text-align:center;padding:40px;"><p>⏳ 载入商品中...</p></div>';
+    }
+  }
+  
+  // 2. 后台从 JSONBin 更新
   try {
     const response = await fetch(JSONBIN_URL, {
       headers: { 'X-Master-Key': JSONBIN_API_KEY }
     });
     const data = await response.json();
     products = data.record;
-    console.log('✅ 成功載入', products.length, '件商品');
+    
+    // 更新缓存
+    localStorage.setItem('raceShopProducts', JSON.stringify(products));
+    console.log('✅ 从云端更新', products.length, '件商品');
+    
+    // 重新渲染
+    renderFeaturedProducts();
+    if (productsContainer) renderProducts();
+    if (adminProductsTableBody) renderAdminProducts();
   } catch (error) {
-    console.error('❌ 載入失敗:', error);
-    products = [];
+    console.error('❌ 云端更新失败:', error);
   }
-  
-  renderFeaturedProducts();
-  if (productsContainer) renderProducts();
-  if (adminProductsTableBody) renderAdminProducts();
 }
 
 // 儲存商品到 JSONBin（管理員修改後）
