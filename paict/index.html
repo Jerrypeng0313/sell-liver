@@ -125,43 +125,34 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: var(--text);  /* 添加這行 */
-}
-
-    .logo-mark {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  background: linear-gradient(135deg, var(--gold), var(--red));
-  border-radius: 8px;
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
+  gap: 12px;
 }
 
 .logo-image {
-  height: 45px;  /* 調整高度 */
-  width: auto;   /* 寬度自動依比例 */
-  display: block;
-  filter: drop-shadow(0 0 15px rgba(255, 59, 92, 0.5));  /* 霓虹光暈效果 */
-  transition: filter 0.3s ease;
+  height: 45px;
+  width: auto;
+  filter: drop-shadow(0 0 15px rgba(255, 59, 92, 0.5));
 }
 
-.logo-image:hover {
-  filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.7));  /* 懸停時更亮 */
-}
-
-.logo span:last-child {
-  background: linear-gradient(135deg, #FFD700, #ff3b5c);
+.logo-text {
+  font-weight: 900;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #FFD700, #ff6b81, #FFD700);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-weight: 900;
-  text-shadow: 0 0 20px rgba(255, 59, 92, 0.5);
+  letter-spacing: 2px;
+  text-shadow:
+    3px 3px 0 rgba(0, 0, 0, 0.3),
+    6px 6px 10px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(255, 215, 0, 0.5);
+  animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
     .nav-links {
