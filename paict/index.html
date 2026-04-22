@@ -1,4 +1,5 @@
-  <!DOCTYPE html>
+
+[<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -827,15 +828,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999 !important;
+      z-index: 1100;
       opacity: 0;
       visibility: hidden;
       transition: all 0.25s;
     }
 
     .modal-overlay.active {
-      opacity: 1 !important;
-      visibility: visible !important;
+      opacity: 1;
+      visibility: visible;
     }
 
     .auth-card {
@@ -845,8 +846,6 @@
       border: 1px solid var(--line-strong);
       border-radius: 24px;
       padding: 28px;
-      z-index: 10001 !important;
-      position: relative;
     }
 
     .auth-tabs {
@@ -912,15 +911,6 @@
       border: none;
       color: white;
       cursor: pointer;
-    }
-
-    #loginForm, #registerForm {
-      width: 100%;
-    }
-
-    .auth-card button {
-      display: block;
-      width: 100%;
     }
 
     .divider {
@@ -2303,6 +2293,126 @@
     height: 200px;
   }
 }
+/* 模態框樣式 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 500px;
+  background: rgba(10, 18, 30, 0.95);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 28px;
+  padding: 28px;
+  backdrop-filter: blur(25px);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h3 {
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #FFD700, #ff3b5c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.input-field {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(255, 215, 0, 0.2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #FFD700;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.2);
+}
+
+.image-upload-area {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.image-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px dashed rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+.image-upload-info {
+  flex: 1;
+  color: var(--muted-2);
+  font-size: 0.85rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-actions .btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 40px;
+}
 /* ========== FiveM 按鈕強化效果 ========== */
 .btn-game {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -2464,38 +2574,6 @@
   transform: translate(-50%, -50%);
   opacity: 0.4;
   pointer-events: none;
-}
-
-/* ========== 強制修復登入表單顯示 ========== */
-#authModal.active {
-  display: flex !important;
-}
-
-#authModal.active #loginForm {
-  display: flex !important;
-  flex-direction: column !important;
-  width: 100% !important;
-}
-
-#authModal.active #registerForm {
-  display: none !important;
-}
-
-#authModal.active .auth-card {
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-.auth-form {
-  width: 100% !important;
-}
-
-.auth-form .input-group,
-.auth-form .input-field,
-.auth-form .auth-btn {
-  display: block !important;
-  width: 100% !important;
 }
   </style>
 </head>
@@ -2683,7 +2761,7 @@
         <!-- 按鈕區 -->
 <div class="hero-actions-new">
   <!-- 立即加入遊戲 按鈕 (使用 FiveM 官方 LOGO) -->
-  <button class="btn-game" onclick="joinFiveMServer()">
+  <button class="btn-game" onclick="window.open('fivem://connect/219.85.83.104:30120', '_blank')">
     <span class="btn-icon">
       <!-- FiveM 官方 LOGO SVG -->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512">
@@ -2718,11 +2796,6 @@
     <span class="btn-text">加入 Discord</span>
     <span class="btn-arrow">→</span>
     <span class="btn-shine"></span>
-  </button>
-
-    <!-- 新增：信用卡贊助按鈕 -->
-  <button class="btn-game" id="donateBtn" style="background: linear-gradient(135deg, #2dff9d, #00cc7a);">
-    💳 贊助我們
   </button>
 </div>
         
@@ -2987,25 +3060,13 @@
     </div>
     <div class="cart-items" id="cartItemsContainer"></div>
     <div class="cart-footer">
-  <div class="cart-total">
-    <span>總計</span>
-    <span id="cartTotal">NT$0</span>
+      <div class="cart-total">
+        <span>總計</span>
+        <span id="cartTotal">NT$0</span>
+      </div>
+      <button class="btn btn-success" id="checkoutBtn" style="width: 100%;">💳 結帳</button>
+    </div>
   </div>
-  
-  <div class="cart-footer">
-  <div class="cart-total">
-    <span>總計</span>
-    <span id="cartTotal">NT$0</span>
-  </div>
-  
-  <!-- Stripe 信用卡付款按鈕 -->
-  <button class="btn btn-success" id="stripeCheckoutBtn" style="width: 100%;">
-    💳付款
-  </button>
-  
-  <!-- 或保留原本的結帳按鈕 -->
-  <!-- <button class="btn btn-success" id="checkoutBtn" style="width: 100%;">💳 結帳</button> -->
-</div>
 
   <!-- 登入模態框 -->
   <div class="modal-overlay" id="authModal">
@@ -3091,46 +3152,6 @@
   <div id="toastContainer"></div>
 
   <script>
-    // 全域 showToast 函數
-    function showToast(msg, type = 'info') {
-      let container = document.getElementById('toastContainer');
-      if (!container) {
-        container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.style.cssText = 'position:fixed;top:90px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none';
-        document.body.appendChild(container);
-      }
-      
-      const toast = document.createElement('div');
-      let icon, borderColor;
-      if (type === 'success') { icon = '✓'; borderColor = '#2dff9d'; }
-      else if (type === 'error') { icon = '✕'; borderColor = '#ff3b5c'; }
-      else if (type === 'warning') { icon = '⚠'; borderColor = '#ffcc00'; }
-      else { icon = '●'; borderColor = '#00c2ff'; }
-      
-      toast.style.cssText = `display:inline-flex;align-items:center;gap:8px;background:rgba(5,10,20,0.95);backdrop-filter:blur(16px);border:1px solid ${borderColor}50;border-radius:30px;padding:6px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transform:translateX(-120%);transition:all 0.25s;opacity:0;max-width:200px;`;
-      
-      toast.innerHTML = `<span style="color:${borderColor};font-weight:700;">${icon}</span><span style="color:#f0f4ff;font-size:12px;">${msg}</span>`;
-      container.appendChild(toast);
-      
-      requestAnimationFrame(() => { toast.style.transform = 'translateX(0)'; toast.style.opacity = '1'; });
-      setTimeout(() => { toast.style.transform = 'translateX(-120%)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 250); }, 2500);
-    }
-
-    // FiveM 伺服器連接函數
-    function joinFiveMServer() {
-      const fivemUrl = 'fivem://connect/219.85.83.104:30120';
-      const webUrl = 'https://cfx.re/join/xmmk9e';
-      
-      window.open(fivemUrl, '_blank');
-      
-      // 如果 2 秒後沒有啟動 FiveM，導向網頁版
-      setTimeout(() => {
-        window.open(webUrl, '_blank');
-        showToast('💡 若未啟動 FiveM，請確認已安裝客戶端', 'info');
-      }, 2000);
-    }
-
     (function(){
       'use strict';
 
@@ -3511,6 +3532,32 @@ productModal?.addEventListener('click', (e) => {
       const checkoutBtn = document.getElementById('checkoutBtn');
       const productsContainer = document.getElementById('productsContainer');
       const featuredContainer = document.getElementById('featuredProducts');
+
+      // ========== Toast ==========
+      function showToast(msg, type = 'info') {
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'toastContainer';
+          container.style.cssText = 'position:fixed;top:90px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none';
+          document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        let icon, borderColor;
+        if (type === 'success') { icon = '✓'; borderColor = '#2dff9d'; }
+        else if (type === 'error') { icon = '✕'; borderColor = '#ff3b5c'; }
+        else if (type === 'warning') { icon = '⚠'; borderColor = '#ffcc00'; }
+        else { icon = '●'; borderColor = '#00c2ff'; }
+        
+        toast.style.cssText = `display:inline-flex;align-items:center;gap:8px;background:rgba(5,10,20,0.95);backdrop-filter:blur(16px);border:1px solid ${borderColor}50;border-radius:30px;padding:6px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transform:translateX(-120%);transition:all 0.25s;opacity:0;max-width:200px;`;
+        
+        toast.innerHTML = `<span style="color:${borderColor};font-weight:700;">${icon}</span><span style="color:#f0f4ff;font-size:12px;">${msg}</span>`;
+        container.appendChild(toast);
+        
+        requestAnimationFrame(() => { toast.style.transform = 'translateX(0)'; toast.style.opacity = '1'; });
+        setTimeout(() => { toast.style.transform = 'translateX(-120%)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 250); }, 2500);
+      }
 
       function switchPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -4278,48 +4325,7 @@ function handleCredentialResponse(response) {
         }
       }
 
-      function openModal() { 
-        const authModal = document.getElementById('authModal');
-        
-        if (authModal) {
-          authModal.classList.add('active');
-          
-          // 🔧 強制設定所有必要的樣式
-          authModal.style.display = 'flex';
-          authModal.style.alignItems = 'center';
-          authModal.style.justifyContent = 'center';
-          
-          // 🔧 強制顯示登入表單
-          const loginForm = document.getElementById('loginForm');
-          const registerForm = document.getElementById('registerForm');
-          
-          if (loginForm) {
-            loginForm.style.display = 'flex';
-            loginForm.style.flexDirection = 'column';
-            loginForm.style.gap = '16px';
-            loginForm.style.width = '100%';
-          }
-          
-          if (registerForm) {
-            registerForm.style.display = 'none';
-          }
-          
-          // 🔧 設定 tab 狀態
-          const tabs = document.querySelectorAll('.auth-tab');
-          tabs.forEach(t => {
-            t.classList.remove('active');
-            if (t.dataset.tab === 'login') {
-              t.classList.add('active');
-            }
-          });
-          
-          resetRegistrationForm();
-          
-          console.log('✅ openModal 執行完成');
-          console.log('loginForm display:', loginForm?.style.display);
-          console.log('registerForm display:', registerForm?.style.display);
-        }
-      }
+      function openModal() { modal.classList.add('active'); setActiveTab('login'); resetRegistrationForm(); }
       function closeModal() { 
         const authModal = document.getElementById('authModal');
         if (authModal) {
@@ -4329,15 +4335,8 @@ function handleCredentialResponse(response) {
       
       function setActiveTab(tabId) {
         tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
-        
-        // 根據 tabId 決定顯示哪個表單
-        if (tabId === 'login') {
-          loginFormDiv.style.display = 'flex';
-          registerFormDiv.style.display = 'none';
-        } else {
-          loginFormDiv.style.display = 'none';
-          registerFormDiv.style.display = 'flex';
-        }
+        loginFormDiv.style.display = tabId === 'login' ? 'flex' : 'none';
+        registerFormDiv.style.display = tabId === 'register' ? 'flex' : 'none';
       }
 
       function startFlashCountdown() {
@@ -4378,21 +4377,7 @@ function handleCredentialResponse(response) {
           closeCart();
         });
 
-        // 直接綁定登入按鈕（如果存在）
-        const showAuthBtn = document.getElementById('showAuthBtn');
-        if (showAuthBtn) {
-          showAuthBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('✅ 登入按鈕被點擊');
-            
-            const modal = document.getElementById('authModal');
-            console.log('模態框元素:', modal);
-            console.log('目前 class:', modal?.className);
-            
-            modal.classList.add('active');
-            console.log('加入 active 後的 class:', modal?.className);
-          });
-        }
+        document.addEventListener('click', (e) => { if(e.target.id==='showAuthBtn'||e.target.closest('#showAuthBtn')){ e.preventDefault(); openModal(); } });
         const closeAuthBtn = document.getElementById('closeAuthBtn');
 if (closeAuthBtn) {
   closeAuthBtn.addEventListener('click', () => {
@@ -4611,7 +4596,7 @@ function updateUIForLogin(user) {
     document.getElementById('userProfileBtn')?.addEventListener('click', showUserMenu);
   } else {
     authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
-    
+    document.getElementById('showAuthBtn')?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
     if (welcomeBanner) welcomeBanner.style.display = 'none';
     
     // 隱藏管理員 UI
@@ -4714,7 +4699,6 @@ function openAdminEditModal(id) {
   if (productModal) productModal.classList.add('active');
 }
 
-
 // 在 bindEvents 中添加管理員按鈕事件 - 已移至 bindEvents 函數內
 // document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
 // document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
@@ -4723,68 +4707,6 @@ function openAdminEditModal(id) {
   
   })();
     </script>
-
-<!-- Stripe 信用卡付款 -->
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-  // 初始化 Stripe（請替換成您的 Publishable Key）
-  const stripe = Stripe('pk_test_您的Stripe公鑰');
-  // 處理信用卡付款
-  async function handleStripeCheckout() {
-    // 計算購物車總金額
-    const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    if (totalAmount === 0) {
-      showToast('🛒 購物車是空的', 'warning');
-      return;
-    }
-    
-    if (!currentUser) {
-      showToast('⚠️ 請先登入再付款', 'warning');
-      openModal();
-      return;
-    }
-    
-    try {
-      // 建立 Stripe Checkout Session（需要後端，這裡先用 Payment Links 替代）
-      // 最簡單的方式：使用 Stripe Payment Links
-      window.open('https://buy.stripe.com/test_14A5kEf4k1dQ94G2yT0Ny00', '_blank');
-      
-      // 清空購物車
-      cart = [];
-      saveCart();
-      closeCart();
-      showToast('🎉 感謝您的贊助！', 'success');
-      
-    } catch (error) {
-      console.error('付款失敗:', error);
-      showToast('❌ 付款失敗，請稍後再試', 'error');
-    }
-  }
-  
-  // 綁定按鈕事件
-  document.addEventListener('DOMContentLoaded', function() {
-    // 購物車結帳按鈕
-    const stripeBtn = document.getElementById('stripeCheckoutBtn');
-    if (stripeBtn) {
-      stripeBtn.addEventListener('click', handleStripeCheckout);
-    }
-    
-    // 原本的結帳按鈕（可選）
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener('click', handleStripeCheckout);
-    }
-    
-    // 贊助按鈕
-    const donateBtn = document.getElementById('donateBtn');
-    if (donateBtn) {
-      donateBtn.addEventListener('click', function() {
-        window.open('https://buy.stripe.com/test_14A5kEf4k1dQ94G2yT0Ny00', '_blank');
-        showToast('💳 感謝您的支持！', 'success');
-      });
-    }
-  });
-</script>
 </body>
-</html>   
+</html>
+]
