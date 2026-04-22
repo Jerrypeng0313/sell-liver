@@ -1,4 +1,4 @@
-[<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -2760,7 +2760,7 @@
         <!-- 按鈕區 -->
 <div class="hero-actions-new">
   <!-- 立即加入遊戲 按鈕 (使用 FiveM 官方 LOGO) -->
-  <button class="btn-game" onclick="window.open('fivem://connect/219.85.83.104:30120', '_blank')">
+  <button class="btn-game" onclick="joinFiveMServer()">
     <span class="btn-icon">
       <!-- FiveM 官方 LOGO SVG -->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512">
@@ -3168,6 +3168,46 @@
   <div id="toastContainer"></div>
 
   <script>
+    // 全域 showToast 函數
+    function showToast(msg, type = 'info') {
+      let container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.style.cssText = 'position:fixed;top:90px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none';
+        document.body.appendChild(container);
+      }
+      
+      const toast = document.createElement('div');
+      let icon, borderColor;
+      if (type === 'success') { icon = '✓'; borderColor = '#2dff9d'; }
+      else if (type === 'error') { icon = '✕'; borderColor = '#ff3b5c'; }
+      else if (type === 'warning') { icon = '⚠'; borderColor = '#ffcc00'; }
+      else { icon = '●'; borderColor = '#00c2ff'; }
+      
+      toast.style.cssText = `display:inline-flex;align-items:center;gap:8px;background:rgba(5,10,20,0.95);backdrop-filter:blur(16px);border:1px solid ${borderColor}50;border-radius:30px;padding:6px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transform:translateX(-120%);transition:all 0.25s;opacity:0;max-width:200px;`;
+      
+      toast.innerHTML = `<span style="color:${borderColor};font-weight:700;">${icon}</span><span style="color:#f0f4ff;font-size:12px;">${msg}</span>`;
+      container.appendChild(toast);
+      
+      requestAnimationFrame(() => { toast.style.transform = 'translateX(0)'; toast.style.opacity = '1'; });
+      setTimeout(() => { toast.style.transform = 'translateX(-120%)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 250); }, 2500);
+    }
+
+    // FiveM 伺服器連接函數
+    function joinFiveMServer() {
+      const fivemUrl = 'fivem://connect/219.85.83.104:30120';
+      const webUrl = 'https://cfx.re/join/xmmk9e';
+      
+      window.open(fivemUrl, '_blank');
+      
+      // 如果 2 秒後沒有啟動 FiveM，導向網頁版
+      setTimeout(() => {
+        window.open(webUrl, '_blank');
+        showToast('💡 若未啟動 FiveM，請確認已安裝客戶端', 'info');
+      }, 2000);
+    }
+
     (function(){
       'use strict';
 
@@ -3548,32 +3588,6 @@ productModal?.addEventListener('click', (e) => {
       const checkoutBtn = document.getElementById('checkoutBtn');
       const productsContainer = document.getElementById('productsContainer');
       const featuredContainer = document.getElementById('featuredProducts');
-
-      // ========== Toast ==========
-      function showToast(msg, type = 'info') {
-        let container = document.getElementById('toastContainer');
-        if (!container) {
-          container = document.createElement('div');
-          container.id = 'toastContainer';
-          container.style.cssText = 'position:fixed;top:90px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none';
-          document.body.appendChild(container);
-        }
-        
-        const toast = document.createElement('div');
-        let icon, borderColor;
-        if (type === 'success') { icon = '✓'; borderColor = '#2dff9d'; }
-        else if (type === 'error') { icon = '✕'; borderColor = '#ff3b5c'; }
-        else if (type === 'warning') { icon = '⚠'; borderColor = '#ffcc00'; }
-        else { icon = '●'; borderColor = '#00c2ff'; }
-        
-        toast.style.cssText = `display:inline-flex;align-items:center;gap:8px;background:rgba(5,10,20,0.95);backdrop-filter:blur(16px);border:1px solid ${borderColor}50;border-radius:30px;padding:6px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);transform:translateX(-120%);transition:all 0.25s;opacity:0;max-width:200px;`;
-        
-        toast.innerHTML = `<span style="color:${borderColor};font-weight:700;">${icon}</span><span style="color:#f0f4ff;font-size:12px;">${msg}</span>`;
-        container.appendChild(toast);
-        
-        requestAnimationFrame(() => { toast.style.transform = 'translateX(0)'; toast.style.opacity = '1'; });
-        setTimeout(() => { toast.style.transform = 'translateX(-120%)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 250); }, 2500);
-      }
 
       function switchPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -4820,4 +4834,4 @@ function openAdminEditModal(id) {
   });
 </script>
 </body>
-</html>
+</html>   
