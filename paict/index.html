@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+不用給我完整的<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -3163,7 +3163,7 @@ const GOOGLE_CLIENT_ID = '1015579088204-4bhr0d5i8jslurguo0l2d8pes50507jf.apps.go
 emailjs.init(EMAILJS_PUBLIC_KEY);
 console.log('✅ EmailJS 已初始化');
 
-// ========== Firebase 配置 ==========
+// ========== Firebase 最簡化設定 ==========
 const firebaseConfig = {
   apiKey: "AIzaSyBMvAWmGA1FgPdqpWW1HhlgiPyrm4wY9xo",
   authDomain: "sell-liver.firebaseapp.com",
@@ -3173,14 +3173,14 @@ const firebaseConfig = {
   appId: "1:676999558140:web:169973d362b5df8a73f879"
 };
 
-// 初始化 Firebase
+// 初始化
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(firebase.app(), 'sell-liver-db');  
+const db = firebase.firestore();
 
-// ========== 商品數據（從 Firebase 讀取，所有人共用） ==========
+// ========== 商品數據 ==========
 let products = [];
 
-// 從 Firebase 載入商品
+// 載入商品
 async function loadProducts() {
   console.log('📦 從 Firebase 載入商品...');
   try {
@@ -3189,12 +3189,10 @@ async function loadProducts() {
     console.log('✅ 成功載入', products.length, '件商品');
     
     if (products.length === 0) {
-      await setDefaultProductsToFirebase();
+      await setDefaultProducts();
     }
   } catch (error) {
-    console.error('❌ Firebase 連線失敗:', error);
-    const stored = localStorage.getItem('raceShopProducts');
-    products = stored ? JSON.parse(stored) : [];
+    console.error('❌ 載入失敗:', error);
   }
   
   renderFeaturedProducts();
@@ -3202,62 +3200,19 @@ async function loadProducts() {
   if (adminProductsTableBody) renderAdminProducts();
 }
 
-// 寫入預設商品到 Firebase
-async function setDefaultProductsToFirebase() {
-  const defaultProducts = [
-    { id: 1, name: '霓虹賽車手套', price: 1290, image: '🧤', description: '專業級賽車手套，防滑透氣', stock: 25 },
-    { id: 2, name: '碳纖維安全帽', price: 8990, image: '⛑️', description: '輕量化碳纖維，霓虹藍塗裝', stock: 12 },
-    { id: 3, name: '競速賽車服', price: 4590, image: '👕', description: '防火材質，紅藍漸層設計', stock: 18 },
-    { id: 4, name: '賽車鞋', price: 2890, image: '👟', description: '極致抓地力，專業賽車鞋', stock: 30 },
-    { id: 5, name: 'RACE 連帽外套', price: 1890, image: '🧥', description: '限量版霓虹刺繡外套', stock: 22 },
-    { id: 6, name: '鈦合金排氣管', price: 12900, image: '🔧', description: '高性能改裝排氣管', stock: 5 }
+// 預設商品
+async function setDefaultProducts() {
+  const defaults = [
+    { id: 1, name: '霓虹賽車手套', price: 1290, image: '🧤', description: '專業級賽車手套', stock: 25 },
+    { id: 2, name: '碳纖維安全帽', price: 8990, image: '⛑️', description: '輕量化碳纖維', stock: 12 },
+    { id: 3, name: '競速賽車服', price: 4590, image: '👕', description: '防火材質', stock: 18 },
+    { id: 4, name: '賽車鞋', price: 2890, image: '👟', description: '極致抓地力', stock: 30 }
   ];
   
-  for (const p of defaultProducts) {
+  for (const p of defaults) {
     await db.collection('products').doc(String(p.id)).set(p);
   }
-  products = defaultProducts;
-}
-
-// 儲存商品到 Firebase
-async function saveProduct(product) {
-  try {
-    await db.collection('products').doc(String(product.id)).set(product);
-    console.log('✅ 商品已儲存到 Firebase');
-    return true;
-  } catch (error) {
-    console.error('❌ 儲存失敗:', error);
-    return false;
-  }
-}
-
-// 新增商品到 Firebase
-async function addProductToFirebase(product) {
-  try {
-    const snapshot = await db.collection('products').orderBy('id', 'desc').limit(1).get();
-    const maxId = snapshot.empty ? 0 : snapshot.docs[0].data().id;
-    const newId = maxId + 1;
-    product.id = newId;
-    await db.collection('products').doc(String(newId)).set(product);
-    products.push(product);
-    console.log('✅ 商品已新增到 Firebase');
-    return true;
-  } catch (error) {
-    console.error('❌ 新增失敗:', error);
-    return false;
-  }
-}
-
-// 刪除商品從 Firebase
-async function deleteProductFromFirebase(id) {
-  try {
-    await db.collection('products').doc(String(id)).delete();
-    console.log('✅ 商品已從 Firebase 刪除');
-    return true;
-  } catch (error) {
-    console.error('❌ 刪除失敗:', error);
-    return false;
-  }
+  products = defaults;
 }
 
 // 管理員商品編輯狀態
@@ -3362,11 +3317,11 @@ productModal?.addEventListener('click', (e) => {
   if (e.target === productModal) closeModal();
 });
 
-// 綁定新增商品按鈕
-document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+// 綁定新增商品按鈕 - 已移至 bindEvents 函數內
+// document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
 
-// 儲存商品按鈕事件
-saveProductBtn?.addEventListener('click', saveAdminProduct);
+// 儲存商品按鈕事件 - 已移至 bindEvents 函數內
+// saveProductBtn?.addEventListener('click', saveAdminProduct);
 
       // ========== 購物車 ==========
       let cart = JSON.parse(localStorage.getItem('raceCart') || '[]');
@@ -4579,35 +4534,27 @@ function closeModal() {
 
 // 儲存商品
 async function saveAdminProduct() {
-  const name = productName?.value.trim() || '';
-  const description = productDescription?.value.trim() || '';
-  const price = parseInt(productPrice?.value) || 0;
-  const stock = parseInt(productStock?.value) || 0;
+  const name = document.getElementById('productName')?.value.trim() || '';
+  const price = parseInt(document.getElementById('productPrice')?.value) || 0;
   
-  let image = currentImageData;
-  if (!image) image = '📦';
-  
-  if (!name || !description || !price) {
-    alert('請填寫所有欄位');
+  if (!name || !price) {
+    alert('請填寫商品名稱和價格');
     return;
   }
   
-  const productData = { name, description, price, stock, image };
+  const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  const product = {
+    id: newId,
+    name: name,
+    description: document.getElementById('productDescription')?.value || '',
+    price: price,
+    stock: parseInt(document.getElementById('productStock')?.value) || 10,
+    image: currentImageData || '📦'
+  };
   
-  if (editingProductId) {
-    productData.id = editingProductId;
-    const index = products.findIndex(p => Number(p.id) === Number(editingProductId));
-    if (index !== -1) products[index] = productData;
-    
-    // 同步到 Firebase
-    await saveProduct(productData);
-    
-    showToast(`✅ 已更新「${name}」`, 'success');
-  } else {
-    // 新增到 Firebase
-    await addProductToFirebase(productData);
-    showToast(`✅ 已新增「${name}」`, 'success');
-  }
+  // 儲存到 Firebase
+  await db.collection('products').doc(String(newId)).set(product);
+  products.push(product);
   
   // 重新渲染
   renderAdminProducts();
@@ -4615,20 +4562,21 @@ async function saveAdminProduct() {
   if (productsContainer) renderProducts();
   
   closeModal();
+  alert('✅ 商品已新增到雲端！');
 }
 
 // 刪除商品
 async function deleteProduct(id) {
-  if (!confirm('確定要刪除此商品嗎？')) return;
+  if (!confirm('確定要刪除嗎？')) return;
   
-  await deleteProductFromFirebase(id);
-  products = products.filter(p => Number(p.id) !== Number(id));
+  await db.collection('products').doc(String(id)).delete();
+  products = products.filter(p => p.id !== id);
   
   renderAdminProducts();
   renderFeaturedProducts();
   if (productsContainer) renderProducts();
   
-  showToast('🗑️ 商品已刪除', 'info');
+  alert('🗑️ 商品已刪除');
 }
 
 // 修改 switchPage 函數，加入管理員頁面
@@ -4644,13 +4592,123 @@ function switchPage(pageId) {
   if (pageId === 'admin') renderAdminProducts();
 }
 
-// 在 bindEvents 中添加管理員按鈕事件
-document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
-document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
+// 在 bindEvents 中添加管理員按鈕事件 - 已移至 bindEvents 函數內
+// document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+// document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
 
       init();
   
   })();
     </script>
+<script>
+  // 緊急修復：手動綁定儲存按鈕（修正版）
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      const saveBtn = document.getElementById('saveProductBtn');
+      const addBtn = document.getElementById('addProductBtn');
+      const closeBtn = document.getElementById('closeProductModal');
+      const cancelBtn = document.getElementById('cancelModalBtn');
+      const modal = document.getElementById('productModal');
+      
+      console.log('🔧 手動綁定按鈕事件');
+      
+      // 確保有 products 變數，如果沒有就建立一個
+      if (typeof products === 'undefined') {
+        window.products = [];
+        console.log('📦 建立 products 陣列');
+      }
+      
+      // 儲存按鈕
+      if (saveBtn) {
+        saveBtn.onclick = function() {
+          console.log('✅ 儲存按鈕被點擊了！');
+          
+          const name = document.getElementById('productName')?.value || '';
+          const description = document.getElementById('productDescription')?.value || '';
+          const price = document.getElementById('productPrice')?.value || '';
+          const stock = document.getElementById('productStock')?.value || '10';
+          
+          if (!name || !price) {
+            alert('請填寫商品名稱和價格');
+            return;
+          }
+          
+          // 使用 window.products 或 products
+          const productList = window.products || products || [];
+          
+          // 新增商品
+          const newId = productList.length > 0 ? Math.max(...productList.map(p => p.id)) + 1 : 1;
+          const newProduct = {
+            id: newId,
+            name: name,
+            description: description,
+            price: parseInt(price),
+            stock: parseInt(stock),
+            image: window.currentImageData || '📦'
+          };
+          
+          productList.push(newProduct);
+          
+          // 儲存到 localStorage
+          localStorage.setItem('raceAdminProducts', JSON.stringify(productList));
+          localStorage.setItem('raceShopProducts', JSON.stringify(productList));
+          
+          // 同步到全域變數
+          window.products = productList;
+          
+          // 關閉模態框
+          if (modal) modal.classList.remove('active');
+          
+          alert('✅ 商品已新增！重整頁面即可看到。');
+          
+          // 重新整理頁面
+          setTimeout(() => location.reload(), 500);
+        };
+      }
+      
+      // 新增按鈕
+      if (addBtn) {
+        addBtn.onclick = function() {
+          console.log('✅ 新增按鈕被點擊了！');
+          if (modal) {
+            modal.classList.add('active');
+            const title = document.getElementById('modalTitle');
+            if (title) title.textContent = '➕ 新增商品';
+            const nameInput = document.getElementById('productName');
+            if (nameInput) nameInput.value = '';
+            const descInput = document.getElementById('productDescription');
+            if (descInput) descInput.value = '';
+            const priceInput = document.getElementById('productPrice');
+            if (priceInput) priceInput.value = '';
+            const stockInput = document.getElementById('productStock');
+            if (stockInput) stockInput.value = '10';
+          }
+        };
+      }
+      
+      // 關閉按鈕
+      if (closeBtn) {
+        closeBtn.onclick = function() {
+          if (modal) modal.classList.remove('active');
+        };
+      }
+      
+      // 取消按鈕
+      if (cancelBtn) {
+        cancelBtn.onclick = function() {
+          if (modal) modal.classList.remove('active');
+        };
+      }
+      
+      // 點擊背景關閉
+      if (modal) {
+        modal.onclick = function(e) {
+          if (e.target === modal) modal.classList.remove('active');
+        };
+      }
+      
+    }, 1000);
+  });
+</script>
 </body>
 </html>
