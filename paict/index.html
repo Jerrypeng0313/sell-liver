@@ -12,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
     /* ========== 核心变量 ========== */
     :root {
@@ -48,36 +50,45 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* ========== 影片背景 ========== */
-    .video-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-      overflow: hidden;
-      background: #05070d; /* 影片載入前的背景色 */
-    }
+   /* YouTube 影片背景 */
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  overflow: hidden;
+  background: #05070d;
+  pointer-events: none; /* 讓滑鼠事件穿透，按鈕可以點擊 */
+}
 
-    .video-background video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.90; /* 調整透明度，讓內容更清楚 */
-    }
+.video-background iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw; /* 16:9 比例 */
+  min-height: 100vh;
+  min-width: 177.77vh;
+  transform: translate(-50%, -50%);
+  border: none;
+  opacity: 0.5; /* 調整透明度，讓內容更清楚 */
+}
 
-    .video-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at top left, rgba(0, 194, 255, 0.15), transparent 40%),
-                  radial-gradient(circle at top right, rgba(255, 59, 92, 0.12), transparent 40%),
-                  linear-gradient(180deg, rgba(5, 7, 13, 0.75) 0%, rgba(5, 7, 13, 0.9) 100%);
-      z-index: -1;
-    }
+/* 覆蓋層 - 讓內容更清楚 */
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(0, 194, 255, 0.15), transparent 40%),
+              radial-gradient(circle at top right, rgba(255, 59, 92, 0.12), transparent 40%),
+              linear-gradient(180deg, rgba(5, 7, 13, 0.75) 0%, rgba(5, 7, 13, 0.9) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
 
     body {
       font-family: 'Inter', sans-serif;
@@ -2266,6 +2277,126 @@
     height: 200px;
   }
 }
+/* 模態框樣式 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 500px;
+  background: rgba(10, 18, 30, 0.95);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 28px;
+  padding: 28px;
+  backdrop-filter: blur(25px);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h3 {
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #FFD700, #ff3b5c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.input-field {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(255, 215, 0, 0.2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #FFD700;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.2);
+}
+
+.image-upload-area {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.image-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px dashed rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+.image-upload-info {
+  flex: 1;
+  color: var(--muted-2);
+  font-size: 0.85rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-actions .btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 40px;
+}
 /* ========== FiveM 按鈕強化效果 ========== */
 .btn-game {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -2381,7 +2512,7 @@
 }
 
 .admin-only.show {
-  display: flex !important;
+  display: block !important;
 }
 
 /* 管理員商品圖片預覽 */
@@ -2416,18 +2547,57 @@
   border-color: var(--red);
   color: var(--red);
 }
+#youtube-player {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw;
+  min-height: 100vh;
+  min-width: 177.77vh;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+  pointer-events: none;
+}
   </style>
 </head>
 <body>
-  <!-- 影片背景 -->
-  <div class="video-background">
-    <video autoplay muted loop playsinline>
-      <!-- 請將 src 改為您的影片路徑 -->
-      <source src="race-bg.mp4" type="video/mp4">
-      <!-- 如果影片無法載入，顯示備用背景色 -->
-    </video>
-  </div>
-  <div class="video-overlay"></div>
+<!-- YouTube 影片背景（API 版本） -->
+<div class="video-background">
+  <div id="youtube-player"></div>
+</div>
+<div class="video-overlay"></div>
+
+<script>
+  // 載入 YouTube API
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player', {
+      videoId: 'Zi2RpZWhXWk',
+      playerVars: {
+        autoplay: 1,
+        mute: 1,
+        loop: 1,
+        controls: 0,
+        showinfo: 0,
+        rel: 0,
+        playlist: 'Zi2RpZWhXWk'
+      },
+      events: {
+        onReady: onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    event.target.playVideo();
+  }
+</script>
 
   <header class="navbar">
     <div class="container nav-inner">
@@ -2813,6 +2983,56 @@
         <p style="color: var(--muted);">即將推出全球排行榜...</p>
       </div>
     </div>
+
+    <!-- 新增/編輯商品模態框 -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modalTitle">➕ 新增商品</h3>
+      <button class="close-modal" id="closeProductModal">&times;</button>
+    </div>
+    
+    <div class="input-group">
+      <label>🖼️ 商品圖片（點擊上傳）</label>
+      <div class="image-upload-area">
+        <img id="imagePreview" class="image-preview" src="" alt="點擊上傳圖片" onclick="document.getElementById('productImageInput').click()">
+        <div class="image-upload-info">
+          <p>點擊圖片上傳（支援 JPG、PNG）</p>
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('productImageInput').click()">📁 選擇圖片</button>
+          <button type="button" class="btn btn-ghost" id="clearImageBtn" style="display: none;">🗑️ 清除</button>
+        </div>
+      </div>
+      <input type="file" id="productImageInput" accept="image/*" style="display: none;">
+    </div>
+    
+    <div class="input-group">
+      <label>📝 商品名稱</label>
+      <input type="text" id="productName" class="input-field" placeholder="商品名稱">
+    </div>
+    
+    <div class="input-group">
+      <label>📄 商品描述</label>
+      <textarea id="productDescription" class="input-field" placeholder="商品描述" rows="2"></textarea>
+    </div>
+    
+    <div class="input-group">
+      <label>💰 價格 (NT$)</label>
+      <input type="number" id="productPrice" class="input-field" placeholder="價格" min="0">
+    </div>
+    
+    <div class="input-group">
+      <label>📦 庫存數量</label>
+      <input type="number" id="productStock" class="input-field" placeholder="庫存" min="0" value="10">
+    </div>
+    
+    <div id="modalError" style="color: var(--red); display: none;"></div>
+    
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelModalBtn">取消</button>
+      <button class="btn btn-gold" id="saveProductBtn">儲存</button>
+    </div>
+  </div>
+</div>
   </main>
 
   <!-- 購物車側邊欄 -->
@@ -2919,58 +3139,234 @@
     (function(){
       'use strict';
 
-      // ========== 配置 ==========
-      const EMAILJS_PUBLIC_KEY = '2S4HExotZb9QyOmiA';
-      const EMAILJS_SERVICE_ID = 'service_8jwm8ve';
-      const EMAILJS_TEMPLATE_ID = 'template_62h7lcv';
-      const GOOGLE_CLIENT_ID = '1015579088204-4bhr0d5i8jslurguo0l2d8pes50507jf.apps.googleusercontent.com';
-      
-      emailjs.init(EMAILJS_PUBLIC_KEY);
-      console.log('✅ EmailJS 已初始化');
-      
-      // ========== 商品數據 (從 localStorage 讀取) ==========
-      let products = [];
+// DOM 元素（模態框相關）- 請添加到變數宣告區
+const productModal = document.getElementById('productModal');
+const modalTitle = document.getElementById('modalTitle');
+const closeProductModal = document.getElementById('closeProductModal');
+const cancelModalBtn = document.getElementById('cancelModalBtn');
+const saveProductBtn = document.getElementById('saveProductBtn');
+const productImageInput = document.getElementById('productImageInput');
+const imagePreview = document.getElementById('imagePreview');
+const clearImageBtn = document.getElementById('clearImageBtn');
+const productName = document.getElementById('productName');
+const productDescription = document.getElementById('productDescription');
+const productPrice = document.getElementById('productPrice');
+const productStock = document.getElementById('productStock');
+const adminProductsTableBody = document.getElementById('adminProductsTableBody');
 
-      function loadProducts() {
-        console.log('📦 載入商品...');
-        
-        let stored = localStorage.getItem('raceAdminProducts');
-        if (!stored) {
-          stored = localStorage.getItem('raceShopProducts');
-        }
-        
-        if (stored) {
-          try {
-            products = JSON.parse(stored);
-            products = products.map(p => ({ ...p, id: Number(p.id) }));
-            console.log('✅ 成功載入', products.length, '件商品');
-          } catch (e) {
-            console.error('❌ 解析失敗，使用預設值');
-            setDefaultProducts();
-          }
-        } else {
-          console.log('📝 無儲存資料，使用預設值');
-          setDefaultProducts();
-        }
-        
-        localStorage.setItem('raceShopProducts', JSON.stringify(products));
-        
-        renderFeaturedProducts();
-        if (productsContainer) renderProducts();
-      }
+// ========== 配置 ==========
+const EMAILJS_PUBLIC_KEY = '2S4HExotZb9QyOmiA';
+const EMAILJS_SERVICE_ID = 'service_8jwm8ve';
+const EMAILJS_TEMPLATE_ID = 'template_62h7lcv';
+const GOOGLE_CLIENT_ID = '1015579088204-4bhr0d5i8jslurguo0l2d8pes50507jf.apps.googleusercontent.com';
 
-      function setDefaultProducts() {
-        products = [
-          { id: 1, name: '霓虹賽車手套', price: 1290, image: '🧤', description: '專業級賽車手套，防滑透氣', stock: 25 },
-          { id: 2, name: '碳纖維安全帽', price: 8990, image: '⛑️', description: '輕量化碳纖維，霓虹藍塗裝', stock: 12 },
-          { id: 3, name: '競速賽車服', price: 4590, image: '👕', description: '防火材質，紅藍漸層設計', stock: 18 },
-          { id: 4, name: '賽車鞋', price: 2890, image: '👟', description: '極致抓地力，專業賽車鞋', stock: 30 },
-          { id: 5, name: 'RACE 連帽外套', price: 1890, image: '🧥', description: '限量版霓虹刺繡外套', stock: 22 },
-          { id: 6, name: '鈦合金排氣管', price: 12900, image: '🔧', description: '高性能改裝排氣管', stock: 5 }
-        ];
-        localStorage.setItem('raceAdminProducts', JSON.stringify(products));
-        localStorage.setItem('raceShopProducts', JSON.stringify(products));
-      }
+emailjs.init(EMAILJS_PUBLIC_KEY);
+console.log('✅ EmailJS 已初始化');
+
+// ========== Firebase 配置 ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyBMvAWmGA1FgPdqpWW1HhlgiPyrm4wY9xo",
+  authDomain: "sell-liver.firebaseapp.com",
+  projectId: "sell-liver",
+  storageBucket: "sell-liver.firebasestorage.app",
+  messagingSenderId: "676999558140",
+  appId: "1:676999558140:web:169973d362b5df8a73f879"
+};
+
+// 初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore(firebase.app(), 'sell-liver-db');  
+
+// ========== 商品數據（從 Firebase 讀取，所有人共用） ==========
+let products = [];
+
+// 從 Firebase 載入商品
+async function loadProducts() {
+  console.log('📦 從 Firebase 載入商品...');
+  try {
+    const snapshot = await db.collection('products').get();
+    products = snapshot.docs.map(doc => ({ id: Number(doc.id), ...doc.data() }));
+    console.log('✅ 成功載入', products.length, '件商品');
+    
+    if (products.length === 0) {
+      await setDefaultProductsToFirebase();
+    }
+  } catch (error) {
+    console.error('❌ Firebase 連線失敗:', error);
+    const stored = localStorage.getItem('raceShopProducts');
+    products = stored ? JSON.parse(stored) : [];
+  }
+  
+  renderFeaturedProducts();
+  if (productsContainer) renderProducts();
+  if (adminProductsTableBody) renderAdminProducts();
+}
+
+// 寫入預設商品到 Firebase
+async function setDefaultProductsToFirebase() {
+  const defaultProducts = [
+    { id: 1, name: '霓虹賽車手套', price: 1290, image: '🧤', description: '專業級賽車手套，防滑透氣', stock: 25 },
+    { id: 2, name: '碳纖維安全帽', price: 8990, image: '⛑️', description: '輕量化碳纖維，霓虹藍塗裝', stock: 12 },
+    { id: 3, name: '競速賽車服', price: 4590, image: '👕', description: '防火材質，紅藍漸層設計', stock: 18 },
+    { id: 4, name: '賽車鞋', price: 2890, image: '👟', description: '極致抓地力，專業賽車鞋', stock: 30 },
+    { id: 5, name: 'RACE 連帽外套', price: 1890, image: '🧥', description: '限量版霓虹刺繡外套', stock: 22 },
+    { id: 6, name: '鈦合金排氣管', price: 12900, image: '🔧', description: '高性能改裝排氣管', stock: 5 }
+  ];
+  
+  for (const p of defaultProducts) {
+    await db.collection('products').doc(String(p.id)).set(p);
+  }
+  products = defaultProducts;
+}
+
+// 儲存商品到 Firebase
+async function saveProduct(product) {
+  try {
+    await db.collection('products').doc(String(product.id)).set(product);
+    console.log('✅ 商品已儲存到 Firebase');
+    return true;
+  } catch (error) {
+    console.error('❌ 儲存失敗:', error);
+    return false;
+  }
+}
+
+// 新增商品到 Firebase
+async function addProductToFirebase(product) {
+  try {
+    const snapshot = await db.collection('products').orderBy('id', 'desc').limit(1).get();
+    const maxId = snapshot.empty ? 0 : snapshot.docs[0].data().id;
+    const newId = maxId + 1;
+    product.id = newId;
+    await db.collection('products').doc(String(newId)).set(product);
+    products.push(product);
+    console.log('✅ 商品已新增到 Firebase');
+    return true;
+  } catch (error) {
+    console.error('❌ 新增失敗:', error);
+    return false;
+  }
+}
+
+// 刪除商品從 Firebase
+async function deleteProductFromFirebase(id) {
+  try {
+    await db.collection('products').doc(String(id)).delete();
+    console.log('✅ 商品已從 Firebase 刪除');
+    return true;
+  } catch (error) {
+    console.error('❌ 刪除失敗:', error);
+    return false;
+  }
+}
+
+// 管理員商品編輯狀態
+let editingProductId = null;
+
+// ========== 圖片處理函數 ==========
+let currentImageData = '';
+
+// 清除圖片
+function clearImage() {
+  currentImageData = '';
+  const imagePreview = document.getElementById('imagePreview');
+  const productImageInput = document.getElementById('productImageInput');
+  const clearImageBtn = document.getElementById('clearImageBtn');
+  
+  if (imagePreview) {
+    imagePreview.src = '';
+    imagePreview.style.fontSize = '40px';
+    imagePreview.textContent = '🖼️';
+  }
+  if (productImageInput) productImageInput.value = '';
+  if (clearImageBtn) clearImageBtn.style.display = 'none';
+}
+
+// 設定預覽圖片（用於編輯時）
+function setPreviewImage(imageData) {
+  const imagePreview = document.getElementById('imagePreview');
+  const clearImageBtn = document.getElementById('clearImageBtn');
+  
+  if (!imagePreview) return;
+  
+  if (imageData && imageData.startsWith('data:image')) {
+    currentImageData = imageData;
+    imagePreview.src = imageData;
+    imagePreview.style.fontSize = '0';
+    imagePreview.textContent = '';
+    if (clearImageBtn) clearImageBtn.style.display = 'block';
+  } else {
+    clearImage();
+    if (imageData && imagePreview) {
+      imagePreview.textContent = imageData;
+    }
+  }
+}
+
+// 處理圖片上傳
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('❌ 圖片不能超過 2MB', 'error');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentImageData = e.target.result;
+    const imagePreview = document.getElementById('imagePreview');
+    const clearImageBtn = document.getElementById('clearImageBtn');
+    if (imagePreview) {
+      imagePreview.src = currentImageData;
+      imagePreview.style.fontSize = '0';
+    }
+    if (clearImageBtn) clearImageBtn.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function openAdminAddModal() {
+  editingProductId = null;
+  
+  const modalTitle = document.getElementById('modalTitle');
+  const productName = document.getElementById('productName');
+  const productDescription = document.getElementById('productDescription');
+  const productPrice = document.getElementById('productPrice');
+  const productStock = document.getElementById('productStock');
+  
+  if (modalTitle) modalTitle.textContent = '➕ 新增商品';
+  if (productName) productName.value = '';
+  if (productDescription) productDescription.value = '';
+  if (productPrice) productPrice.value = '';
+  if (productStock) productStock.value = '10';
+  
+  // 呼叫 clearImage 函數（現在已定義）
+  clearImage();
+  
+  const productModal = document.getElementById('productModal');
+  if (productModal) productModal.classList.add('active');
+}
+
+// 關閉模態框
+function closeModal() {
+  productModal.classList.remove('active');
+  editingProductId = null;
+}
+
+// 綁定模態框事件
+closeProductModal?.addEventListener('click', closeModal);
+cancelModalBtn?.addEventListener('click', closeModal);
+productModal?.addEventListener('click', (e) => {
+  if (e.target === productModal) closeModal();
+});
+
+// 綁定新增商品按鈕
+document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+
+// 儲存商品按鈕事件
+saveProductBtn?.addEventListener('click', saveAdminProduct);
 
       // ========== 購物車 ==========
       let cart = JSON.parse(localStorage.getItem('raceCart') || '[]');
@@ -3082,6 +3478,7 @@
         
         if (pageId === 'shop') renderProducts();
         if (pageId === 'dashboard') renderFeaturedProducts();
+        if (pageId === 'admin') renderAdminProducts();
       }
 
       function renderProducts() {
@@ -3240,30 +3637,6 @@
         rankIdx = Math.floor(Math.random() * RANKS.length);
         updateDash();
         showToast('📊 數據已刷新', 'info');
-      }
-
-      function updateUIForLogin(user) {
-        if (user) {
-          const avatarUrl = user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=00c2ff&color=fff`;
-          authButtonContainer.innerHTML = `
-            <div class="user-profile" id="userProfileBtn">
-              <img src="${avatarUrl}" alt="${user.name}" class="user-avatar">
-              <span class="user-name">${user.name.split(' ')[0]}</span>
-            </div>
-          `;
-          
-          if (welcomeBanner) {
-            welcomeBanner.style.display = 'block';
-            if (displayUserName) displayUserName.textContent = user.name;
-            if (loginMethodBadge) loginMethodBadge.textContent = user.loginMethod === 'google' ? '(Google)' : '(Email)';
-          }
-          
-          document.getElementById('userProfileBtn')?.addEventListener('click', showUserMenu);
-        } else {
-          authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
-          document.getElementById('showAuthBtn')?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
-          if (welcomeBanner) welcomeBanner.style.display = 'none';
-        }
       }
 
       // ========== 顯示用戶選單 (新版：包含設置入口) ==========
@@ -3865,10 +4238,19 @@ function handleCredentialResponse(response) {
       }
 
       function bindEvents() {
+        const productImageInput = document.getElementById('productImageInput');
+       const clearImageBtn = document.getElementById('clearImageBtn');
+
+      if (productImageInput) {
+      productImageInput.addEventListener('change', handleImageUpload);
+      }
+      if (clearImageBtn) {
+      clearImageBtn.addEventListener('click', clearImage);
+      }
         document.querySelectorAll('[data-page]').forEach(link => {
           link.addEventListener('click', (e) => { e.preventDefault(); switchPage(link.dataset.page); });
         });
-
+ 
         cartToggleBtn?.addEventListener('click', openCart);
         closeCartBtn?.addEventListener('click', closeCart);
         cartOverlay?.addEventListener('click', closeCart);
@@ -3913,6 +4295,42 @@ exitBtn?.addEventListener('click', () => {
 });
 
         refreshBtn?.addEventListener('click', randomizeDash);
+
+        // ========== 模態框事件綁定 ==========
+        // 新增商品按鈕
+        const addProductBtn = document.getElementById('addProductBtn');
+        if (addProductBtn) {
+          addProductBtn.addEventListener('click', openAdminAddModal);
+        }
+
+        // 關閉模態框（X 按鈕）
+        if (closeProductModal) {
+          closeProductModal.addEventListener('click', closeModal);
+        }
+
+        // 取消按鈕
+        if (cancelModalBtn) {
+          cancelModalBtn.addEventListener('click', closeModal);
+        }
+
+        // 儲存按鈕
+        if (saveProductBtn) {
+          saveProductBtn.addEventListener('click', saveAdminProduct);
+        }
+
+        // 點擊背景關閉模態框
+        if (productModal) {
+          productModal.addEventListener('click', (e) => {
+            if (e.target === productModal) closeModal();
+          });
+        }
+
+        // ESC 鍵關閉模態框
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && productModal && productModal.classList.contains('active')) {
+            closeModal();
+          }
+        });
       }
 
       function init() {
@@ -3973,13 +4391,40 @@ function updateServerStats() {
   }
 }
 // ========== 管理員設定 ==========
-const ADMIN_EMAILS = ['admin@liver.com', 'jerrypeng0313@gmail.com']; // 管理員信箱列表
+const ADMIN_EMAILS = ['admin@liver.com', 'jjplaygame1234@gmail.com', 'liuyuzuo4@gmail.com']; // 管理員信箱列表
 
 // 檢查是否為管理員
 function isAdmin(user) {
-  if (!user) return false;
-  return ADMIN_EMAILS.includes(user.email.toLowerCase());
+  if (!user || !user.email) return false;
+  return ADMIN_EMAILS.includes(user.email.trim().toLowerCase());
 }
+
+// NOTE: 以下為原本未包含管理員檢查的版本，已保留供參考
+/*
+function updateUIForLogin(user) {
+  if (user) {
+    const avatarUrl = user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=00c2ff&color=fff`;
+    authButtonContainer.innerHTML = `
+      <div class="user-profile" id="userProfileBtn">
+        <img src="${avatarUrl}" alt="${user.name}" class="user-avatar">
+        <span class="user-name">${user.name.split(' ')[0]}</span>
+      </div>
+    `;
+    
+    if (welcomeBanner) {
+      welcomeBanner.style.display = 'block';
+      if (displayUserName) displayUserName.textContent = user.name;
+      if (loginMethodBadge) loginMethodBadge.textContent = user.loginMethod === 'google' ? '(Google)' : '(Email)';
+    }
+    
+    document.getElementById('userProfileBtn')?.addEventListener('click', showUserMenu);
+  } else {
+    authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
+    document.getElementById('showAuthBtn')?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+    if (welcomeBanner) welcomeBanner.style.display = 'none';
+  }
+}
+*/
 
 // 更新 UI 顯示管理員功能
 function updateAdminUI(user) {
@@ -4031,10 +4476,6 @@ function updateUIForLogin(user) {
     updateAdminUI(null);
   }
 }
-
-// ========== 管理員商品管理功能 ==========
-let editingProductId = null;
-let currentImageData = '';
 
 // 渲染管理員商品表格
 function renderAdminProducts() {
@@ -4099,39 +4540,49 @@ function updateAdminStats() {
   document.getElementById('maxPrice').textContent = `NT$${maxPrice.toLocaleString()}`;
 }
 
-// 開啟新增商品模態框
+// ========== 模態框控制（修正版） ==========
 function openAdminAddModal() {
   editingProductId = null;
-  document.getElementById('modalTitle').textContent = '➕ 新增商品';
-  document.getElementById('productName').value = '';
-  document.getElementById('productDescription').value = '';
-  document.getElementById('productPrice').value = '';
-  document.getElementById('productStock').value = '10';
+  
+  if (modalTitle) modalTitle.textContent = '➕ 新增商品';
+  if (productName) productName.value = '';
+  if (productDescription) productDescription.value = '';
+  if (productPrice) productPrice.value = '';
+  if (productStock) productStock.value = '10';
+  
   clearImage();
-  productModal.classList.add('active');
+  
+  if (productModal) productModal.classList.add('active');
 }
 
-// 開啟編輯商品模態框
 function openAdminEditModal(id) {
   const product = products.find(p => Number(p.id) === Number(id));
   if (!product) return;
   
   editingProductId = id;
-  document.getElementById('modalTitle').textContent = '✏️ 編輯商品';
-  document.getElementById('productName').value = product.name;
-  document.getElementById('productDescription').value = product.description;
-  document.getElementById('productPrice').value = product.price;
-  document.getElementById('productStock').value = product.stock || 0;
+  
+  if (modalTitle) modalTitle.textContent = '✏️ 編輯商品';
+  if (productName) productName.value = product.name;
+  if (productDescription) productDescription.value = product.description;
+  if (productPrice) productPrice.value = product.price;
+  if (productStock) productStock.value = product.stock || 0;
+  
   setPreviewImage(product.image);
-  productModal.classList.add('active');
+  
+  if (productModal) productModal.classList.add('active');
+}
+
+function closeModal() {
+  if (productModal) productModal.classList.remove('active');
+  editingProductId = null;
 }
 
 // 儲存商品
-function saveAdminProduct() {
-  const name = document.getElementById('productName').value.trim();
-  const description = document.getElementById('productDescription').value.trim();
-  const price = parseInt(document.getElementById('productPrice').value);
-  const stock = parseInt(document.getElementById('productStock').value) || 0;
+async function saveAdminProduct() {
+  const name = productName?.value.trim() || '';
+  const description = productDescription?.value.trim() || '';
+  const price = parseInt(productPrice?.value) || 0;
+  const stock = parseInt(productStock?.value) || 0;
   
   let image = currentImageData;
   if (!image) image = '📦';
@@ -4141,21 +4592,22 @@ function saveAdminProduct() {
     return;
   }
   
+  const productData = { name, description, price, stock, image };
+  
   if (editingProductId) {
+    productData.id = editingProductId;
     const index = products.findIndex(p => Number(p.id) === Number(editingProductId));
-    if (index !== -1) {
-      products[index] = { ...products[index], image, name, description, price, stock };
-    }
+    if (index !== -1) products[index] = productData;
+    
+    // 同步到 Firebase
+    await saveProduct(productData);
+    
     showToast(`✅ 已更新「${name}」`, 'success');
   } else {
-    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ id: newId, image, name, description, price, stock });
+    // 新增到 Firebase
+    await addProductToFirebase(productData);
     showToast(`✅ 已新增「${name}」`, 'success');
   }
-  
-  // 儲存到 localStorage
-  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
-  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
   // 重新渲染
   renderAdminProducts();
@@ -4166,13 +4618,11 @@ function saveAdminProduct() {
 }
 
 // 刪除商品
-function deleteProduct(id) {
+async function deleteProduct(id) {
   if (!confirm('確定要刪除此商品嗎？')) return;
   
+  await deleteProductFromFirebase(id);
   products = products.filter(p => Number(p.id) !== Number(id));
-  
-  localStorage.setItem('raceAdminProducts', JSON.stringify(products));
-  localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
   renderAdminProducts();
   renderFeaturedProducts();
