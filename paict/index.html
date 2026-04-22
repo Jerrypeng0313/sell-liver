@@ -834,8 +834,8 @@
     }
 
     .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
 
     .auth-card {
@@ -845,6 +845,8 @@
       border: 1px solid var(--line-strong);
       border-radius: 24px;
       padding: 28px;
+      z-index: 10001 !important;
+      position: relative;
     }
 
     .auth-tabs {
@@ -4357,15 +4359,22 @@ function handleCredentialResponse(response) {
 
       function openModal() { 
         const authModal = document.getElementById('authModal');
+        console.log('🔓 openModal 被呼叫', authModal); // 除錯用
+        
         if (authModal) {
           authModal.classList.add('active');
           setActiveTab('login'); 
           resetRegistrationForm();
           
-          // 聚焦到 Email 輸入框
+          // 確保顯示登入表單
+          document.getElementById('loginForm').style.display = 'flex';
+          document.getElementById('registerForm').style.display = 'none';
+          
           setTimeout(() => {
             document.getElementById('loginEmail')?.focus();
           }, 100);
+        } else {
+          console.error('❌ 找不到 authModal 元素');
         }
       }
       function closeModal() { 
@@ -4424,8 +4433,14 @@ function handleCredentialResponse(response) {
         if (showAuthBtn) {
           showAuthBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('登入按鈕被點擊');
-            openModal();
+            console.log('✅ 登入按鈕被點擊');
+            
+            const modal = document.getElementById('authModal');
+            console.log('模態框元素:', modal);
+            console.log('目前 class:', modal?.className);
+            
+            modal.classList.add('active');
+            console.log('加入 active 後的 class:', modal?.className);
           });
         }
         const closeAuthBtn = document.getElementById('closeAuthBtn');
@@ -4646,18 +4661,6 @@ function updateUIForLogin(user) {
     document.getElementById('userProfileBtn')?.addEventListener('click', showUserMenu);
   } else {
     authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
-    
-    // 確保事件綁定
-    setTimeout(() => {
-      const newAuthBtn = document.getElementById('showAuthBtn');
-      if (newAuthBtn) {
-        newAuthBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          console.log('登入按鈕被點擊');
-          openModal();
-        });
-      }
-    }, 10);
     
     if (welcomeBanner) welcomeBanner.style.display = 'none';
     
