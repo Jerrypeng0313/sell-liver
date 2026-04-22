@@ -2465,6 +2465,38 @@
   opacity: 0.4;
   pointer-events: none;
 }
+
+/* ========== 強制修復登入表單顯示 ========== */
+#authModal.active {
+  display: flex !important;
+}
+
+#authModal.active #loginForm {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+#authModal.active #registerForm {
+  display: none !important;
+}
+
+#authModal.active .auth-card {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.auth-form {
+  width: 100% !important;
+}
+
+.auth-form .input-group,
+.auth-form .input-field,
+.auth-form .auth-btn {
+  display: block !important;
+  width: 100% !important;
+}
   </style>
 </head>
 <body>
@@ -4251,8 +4283,41 @@ function handleCredentialResponse(response) {
         
         if (authModal) {
           authModal.classList.add('active');
-          setActiveTab('login');  // 這個會自動處理表單顯示
+          
+          // 🔧 強制設定所有必要的樣式
+          authModal.style.display = 'flex';
+          authModal.style.alignItems = 'center';
+          authModal.style.justifyContent = 'center';
+          
+          // 🔧 強制顯示登入表單
+          const loginForm = document.getElementById('loginForm');
+          const registerForm = document.getElementById('registerForm');
+          
+          if (loginForm) {
+            loginForm.style.display = 'flex';
+            loginForm.style.flexDirection = 'column';
+            loginForm.style.gap = '16px';
+            loginForm.style.width = '100%';
+          }
+          
+          if (registerForm) {
+            registerForm.style.display = 'none';
+          }
+          
+          // 🔧 設定 tab 狀態
+          const tabs = document.querySelectorAll('.auth-tab');
+          tabs.forEach(t => {
+            t.classList.remove('active');
+            if (t.dataset.tab === 'login') {
+              t.classList.add('active');
+            }
+          });
+          
           resetRegistrationForm();
+          
+          console.log('✅ openModal 執行完成');
+          console.log('loginForm display:', loginForm?.style.display);
+          console.log('registerForm display:', registerForm?.style.display);
         }
       }
       function closeModal() { 
