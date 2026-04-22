@@ -4377,6 +4377,21 @@ function handleCredentialResponse(response) {
         });
 
         document.addEventListener('click', (e) => { if(e.target.id==='showAuthBtn'||e.target.closest('#showAuthBtn')){ e.preventDefault(); openModal(); } });
+        const closeAuthBtn = document.getElementById('closeAuthBtn');
+if (closeAuthBtn) {
+  closeAuthBtn.addEventListener('click', () => {
+    const authModal = document.getElementById('authModal');
+    if (authModal) authModal.classList.remove('active');
+  });
+}
+        const authModal = document.getElementById('authModal');
+if (authModal) {
+  authModal.addEventListener('click', (e) => {
+    if (e.target === authModal) {
+      authModal.classList.remove('active');
+    }
+  });
+}
         
         tabs.forEach(t => t.addEventListener('click', () => setActiveTab(t.dataset.tab)));
         document.getElementById('switchToRegister')?.addEventListener('click', () => setActiveTab('register'));
