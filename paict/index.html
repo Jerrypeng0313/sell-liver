@@ -4405,23 +4405,15 @@ function handleCredentialResponse(response) {
           closeCart();
         });
 
-        // 直接綁定登入按鈕
+        // 直接綁定登入按鈕（如果存在）
         const showAuthBtn = document.getElementById('showAuthBtn');
         if (showAuthBtn) {
           showAuthBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log('登入按鈕被點擊');
             openModal();
           });
         }
-
-        // 重新綁定動態生成的按鈕（用事件委派）
-        document.addEventListener('click', (e) => {
-          const authBtn = e.target.closest('#showAuthBtn');
-          if (authBtn) {
-            e.preventDefault();
-            openModal();
-          }
-        });
         const closeAuthBtn = document.getElementById('closeAuthBtn');
 if (closeAuthBtn) {
   closeAuthBtn.addEventListener('click', () => {
@@ -4641,14 +4633,17 @@ function updateUIForLogin(user) {
   } else {
     authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
     
-    // 重新綁定事件
-    const newAuthBtn = document.getElementById('showAuthBtn');
-    if (newAuthBtn) {
-      newAuthBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal();
-      });
-    }
+    // 確保事件綁定
+    setTimeout(() => {
+      const newAuthBtn = document.getElementById('showAuthBtn');
+      if (newAuthBtn) {
+        newAuthBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          console.log('登入按鈕被點擊');
+          openModal();
+        });
+      }
+    }, 10);
     
     if (welcomeBanner) welcomeBanner.style.display = 'none';
     
