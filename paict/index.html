@@ -914,6 +914,15 @@
       cursor: pointer;
     }
 
+    #loginForm, #registerForm {
+      width: 100%;
+    }
+
+    .auth-card button {
+      display: block;
+      width: 100%;
+    }
+
     .divider {
       display: flex;
       align-items: center;
@@ -4239,22 +4248,21 @@ function handleCredentialResponse(response) {
 
       function openModal() { 
         const authModal = document.getElementById('authModal');
-        console.log('🔓 openModal 被呼叫', authModal); // 除錯用
         
         if (authModal) {
           authModal.classList.add('active');
           setActiveTab('login'); 
           resetRegistrationForm();
           
-          // 確保顯示登入表單
+          // 🔧 強制顯示登入表單
           document.getElementById('loginForm').style.display = 'flex';
           document.getElementById('registerForm').style.display = 'none';
           
-          setTimeout(() => {
-            document.getElementById('loginEmail')?.focus();
-          }, 100);
-        } else {
-          console.error('❌ 找不到 authModal 元素');
+          // 🔧 確保 tab 狀態正確
+          document.querySelectorAll('.auth-tab').forEach(t => {
+            t.classList.remove('active');
+          });
+          document.querySelector('[data-tab="login"]').classList.add('active');
         }
       }
       function closeModal() { 
@@ -4266,8 +4274,8 @@ function handleCredentialResponse(response) {
       
       function setActiveTab(tabId) {
         tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
-        loginFormDiv.style.display = tabId === 'login' ? 'flex' : 'none';
-        registerFormDiv.style.display = tabId === 'register' ? 'flex' : 'none';
+        loginFormDiv.style.display = 'flex';
+        registerFormDiv.style.display = 'flex';
       }
 
       function startFlashCountdown() {
