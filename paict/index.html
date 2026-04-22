@@ -4251,18 +4251,8 @@ function handleCredentialResponse(response) {
         
         if (authModal) {
           authModal.classList.add('active');
-          setActiveTab('login'); 
+          setActiveTab('login');  // 這個會自動處理表單顯示
           resetRegistrationForm();
-          
-          // 🔧 強制顯示登入表單
-          document.getElementById('loginForm').style.display = 'flex';
-          document.getElementById('registerForm').style.display = 'none';
-          
-          // 🔧 確保 tab 狀態正確
-          document.querySelectorAll('.auth-tab').forEach(t => {
-            t.classList.remove('active');
-          });
-          document.querySelector('[data-tab="login"]').classList.add('active');
         }
       }
       function closeModal() { 
@@ -4274,8 +4264,15 @@ function handleCredentialResponse(response) {
       
       function setActiveTab(tabId) {
         tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
-        loginFormDiv.style.display = 'flex';
-        registerFormDiv.style.display = 'flex';
+        
+        // 根據 tabId 決定顯示哪個表單
+        if (tabId === 'login') {
+          loginFormDiv.style.display = 'flex';
+          registerFormDiv.style.display = 'none';
+        } else {
+          loginFormDiv.style.display = 'none';
+          registerFormDiv.style.display = 'flex';
+        }
       }
 
       function startFlashCountdown() {
