@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -2574,48 +2574,6 @@
   opacity: 0.4;
   pointer-events: none;
 }
-
-/* ========== 強制修復登入模態框 ========== */
-#authModal {
-  z-index: 99999 !important;
-}
-
-#authModal.active {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-#authModal.active .auth-card {
-  display: block !important;
-}
-
-#loginForm, #registerForm {
-  width: 100% !important;
-}
-
-/* 商品模態框樣式修復 */
-#productModal {
-  z-index: 99999 !important;
-}
-
-#productModal.active {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-#productModal .modal-card {
-  display: block !important;
-}
-
-.hidden {
-  display: none !important;
-}
   </style>
 </head>
 <body>
@@ -3344,57 +3302,31 @@ async function saveAdminProduct() {
     return;
   }
   
-  // 判斷是新增還是編輯
-  if (editingProductId) {
-    // 編輯模式
-    const product = products.find(p => p.id === editingProductId);
-    if (product) {
-      product.name = name;
-      product.description = document.getElementById('productDescription')?.value || '';
-      product.price = price;
-      product.stock = parseInt(document.getElementById('productStock')?.value) || 10;
-      if (currentImageData) {
-        product.image = currentImageData;
-      }
-    }
-    showToast('✅ 商品已更新！', 'success');
-  } else {
-    // 新增模式
-    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    const product = {
-      id: newId,
-      name: name,
-      description: document.getElementById('productDescription')?.value || '',
-      price: price,
-      stock: parseInt(document.getElementById('productStock')?.value) || 10,
-      image: currentImageData || '📦'
-    };
-    products.push(product);
-    showToast('✅ 商品已新增！', 'success');
-  }
+  // 1. 立即更新本地資料
+  const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  const product = {
+    id: newId,
+    name: name,
+    description: document.getElementById('productDescription')?.value || '',
+    price: price,
+    stock: parseInt(document.getElementById('productStock')?.value) || 10,
+    image: currentImageData || '📦'
+  };
   
-  // 儲存到 localStorage
+  products.push(product);
+  
+  // 2. 立即儲存到 localStorage
   localStorage.setItem('raceShopProducts', JSON.stringify(products));
   
-  // 關閉模態框並重新渲染
-  closeProductModalFunc();
+  // 3. 立即關閉模態框並渲染
+  closeModal();
   renderAdminProducts();
   renderFeaturedProducts();
   if (productsContainer) renderProducts();
+  showToast('✅ 商品已新增！', 'success');
   
-  // 背景同步到雲端
+  // 4. 背景同步到雲端（不阻塞）
   saveToJSONBin();
-}
-
-// 關閉商品模態框的函數
-function closeProductModalFunc() {
-  const productModal = document.getElementById('productModal');
-  if (productModal) {
-    productModal.classList.remove('active');
-  }
-  // 清除表單
-  clearImage();
-  editingProductId = null;
 }
 
 // 刪除商品（瞬間完成 + 背景同步）
@@ -3512,6 +3444,12 @@ function closeAuthModal() {
   if (authModal) authModal.classList.remove('active');
 }
 
+// 綁定模態框事件
+closeProductModal?.addEventListener('click', closeModal);
+cancelModalBtn?.addEventListener('click', closeModal);
+productModal?.addEventListener('click', (e) => {
+  if (e.target === productModal) closeModal();
+});
 
 // 綁定新增商品按鈕 - 已移至 bindEvents 函數內
 //document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
@@ -4386,26 +4324,13 @@ function handleCredentialResponse(response) {
         }
       }
 
-function openModal() { 
-  console.log('🔓 openModal 被呼叫');
-  const authModal = document.getElementById('authModal');
-  if (authModal) {
-    authModal.classList.add('active');
-    authModal.style.display = 'flex';
-    setActiveTab('login'); 
-    resetRegistrationForm();
-    console.log('✅ 模態框已開啟');
-  } else {
-    console.error('❌ 找不到 authModal');
-  }
-}
-
-function closeModal() { 
-  const authModal = document.getElementById('authModal');
-  if (authModal) {
-    authModal.classList.remove('active');
-  }
-}
+      function openModal() { modal.classList.add('active'); setActiveTab('login'); resetRegistrationForm(); }
+      function closeModal() { 
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+          authModal.classList.remove('active');
+        }
+      }
       
       function setActiveTab(tabId) {
         tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
@@ -4499,35 +4424,40 @@ exitBtn?.addEventListener('click', () => {
 
         // ========== 模態框事件綁定 ==========
         // 新增商品按鈕
-if (addProductBtn) {
-   addProductBtn.addEventListener('click', openAdminAddModal);
-} else {
-  console.error('❌ 找不到 addProductBtn');
-  }
+        const addProductBtn = document.getElementById('addProductBtn');
+        if (addProductBtn) {
+          addProductBtn.addEventListener('click', openAdminAddModal);
+        }
 
-// 關閉模態框（X 按鈕）
-if (closeProductModal) {
-  closeProductModal.addEventListener('click', closeProductModalFunc);  // ✅ 正確
-}
+        // 關閉模態框（X 按鈕）
+        if (closeProductModal) {
+          closeProductModal.addEventListener('click', closeModal);
+        }
 
-// 取消按鈕
-if (cancelModalBtn) {
-  cancelModalBtn.addEventListener('click', closeProductModalFunc);  // ✅ 正確
-}
+        // 取消按鈕
+        if (cancelModalBtn) {
+          cancelModalBtn.addEventListener('click', closeModal);
+        }
 
-// 點擊背景關閉模態框
-if (productModal) {
-  productModal.addEventListener('click', (e) => {
-    if (e.target === productModal) closeProductModalFunc();  // ✅ 正確
-  });
-}
+        // 儲存按鈕
+        if (saveProductBtn) {
+          saveProductBtn.addEventListener('click', saveAdminProduct);
+        }
 
-// ESC 鍵關閉模態框
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && productModal && productModal.classList.contains('active')) {
-    closeProductModalFunc();  // ✅ 正確
-  }
-});
+        // 點擊背景關閉模態框
+        if (productModal) {
+          productModal.addEventListener('click', (e) => {
+            if (e.target === productModal) closeModal();
+          });
+        }
+
+        // ESC 鍵關閉模態框
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && productModal && productModal.classList.contains('active')) {
+            closeModal();
+          }
+        });
+      }
 
       function init() {
   console.log('🚀 賣肝人生 1.0 初始化開始...');
@@ -4768,13 +4698,14 @@ function openAdminEditModal(id) {
   if (productModal) productModal.classList.add('active');
 }
 
-function closeModal() {
-  const authModal = document.getElementById('authModal');
-  if (authModal) {
-    authModal.classList.remove('active');
-  }
-}
+// 在 bindEvents 中添加管理員按鈕事件 - 已移至 bindEvents 函數內
+// document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
+// document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
 
-</script>
+      init();
+  
+  })();
+    </script>
 </body>
 </html>
+]
