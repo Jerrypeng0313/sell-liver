@@ -4652,6 +4652,53 @@ function updateAdminStats() {
   document.getElementById('maxPrice').textContent = `NT$${maxPrice.toLocaleString()}`;
 }
 
+// 1. 新增商品按鈕綁定
+const addProductBtn = document.getElementById('addProductBtn');
+if (addProductBtn) {
+  addProductBtn.addEventListener('click', openAdminAddModal);
+}
+
+// 2. 儲存商品按鈕綁定
+if (saveProductBtn) {
+  saveProductBtn.addEventListener('click', saveAdminProduct);
+}
+
+// 3. 儲存商品函數
+async function saveAdminProduct() {
+  const name = document.getElementById('productName')?.value.trim() || '';
+  const price = parseInt(document.getElementById('productPrice')?.value) || 0;
+  
+  if (!name || !price) {
+    showToast('❌ 請填寫商品名稱和價格', 'error');
+    return;
+  }
+  
+  // 新增商品到 products 陣列
+  const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  const product = {
+    id: newId,
+    name: name,
+    description: document.getElementById('productDescription')?.value || '',
+    price: price,
+    stock: parseInt(document.getElementById('productStock')?.value) || 10,
+    image: currentImageData || '📦'
+  };
+  
+  products.push(product);
+  
+  // 儲存到 localStorage
+  localStorage.setItem('raceShopProducts', JSON.stringify(products));
+  
+  // 關閉模態框並重新渲染
+  closeModal();
+  renderAdminProducts();
+  renderFeaturedProducts();
+  if (productsContainer) renderProducts();
+  showToast('✅ 商品已新增！', 'success');
+  
+  // 背景同步到 JSONBin 雲端
+  saveToJSONBin();
+}
 // ========== 模態框控制（修正版） ==========
 function openAdminAddModal() {
   editingProductId = null;
