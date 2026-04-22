@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -2796,6 +2796,11 @@
     <span class="btn-arrow">→</span>
     <span class="btn-shine"></span>
   </button>
+
+    <!-- 新增：信用卡贊助按鈕 -->
+  <button class="btn-game" id="donateBtn" style="background: linear-gradient(135deg, #2dff9d, #00cc7a);">
+    💳 贊助我們
+  </button>
 </div>
         
         <!-- 底部資訊 -->
@@ -3059,13 +3064,25 @@
     </div>
     <div class="cart-items" id="cartItemsContainer"></div>
     <div class="cart-footer">
-      <div class="cart-total">
-        <span>總計</span>
-        <span id="cartTotal">NT$0</span>
-      </div>
-      <button class="btn btn-success" id="checkoutBtn" style="width: 100%;">💳 結帳</button>
-    </div>
+  <div class="cart-total">
+    <span>總計</span>
+    <span id="cartTotal">NT$0</span>
   </div>
+  
+  <div class="cart-footer">
+  <div class="cart-total">
+    <span>總計</span>
+    <span id="cartTotal">NT$0</span>
+  </div>
+  
+  <!-- Stripe 信用卡付款按鈕 -->
+  <button class="btn btn-success" id="stripeCheckoutBtn" style="width: 100%;">
+    💳付款
+  </button>
+  
+  <!-- 或保留原本的結帳按鈕 -->
+  <!-- <button class="btn btn-success" id="checkoutBtn" style="width: 100%;">💳 結帳</button> -->
+</div>
 
   <!-- 登入模態框 -->
   <div class="modal-overlay" id="authModal">
@@ -4698,6 +4715,7 @@ function openAdminEditModal(id) {
   if (productModal) productModal.classList.add('active');
 }
 
+
 // 在 bindEvents 中添加管理員按鈕事件 - 已移至 bindEvents 函數內
 // document.getElementById('addProductBtn')?.addEventListener('click', openAdminAddModal);
 // document.getElementById('saveProductBtn')?.addEventListener('click', saveAdminProduct);
@@ -4706,5 +4724,70 @@ function openAdminEditModal(id) {
   
   })();
     </script>
+
+<!-- Stripe 信用卡付款 -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  // 初始化 Stripe（請替換成您的 Publishable Key）
+  const stripe = Stripe('pk_test_您的Stripe公鑰');
+  
+  // 處理信用卡付款
+  async function handleStripeCheckout() {
+    // 計算購物車總金額
+    const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    if (totalAmount === 0) {
+      showToast('🛒 購物車是空的', 'warning');
+      return;
+    }
+    
+    if (!currentUser) {
+      showToast('⚠️ 請先登入再付款', 'warning');
+      openModal();
+      return;
+    }
+    
+    try {
+      // 建立 Stripe Checkout Session（需要後端，這裡先用 Payment Links 替代）
+      // 最簡單的方式：使用 Stripe Payment Links
+      window.open('https://buy.stripe.com/test_14A5kEf4k1dQ94G2yT0Ny00', '_blank');
+      
+      // 清空購物車
+      cart = [];
+      saveCart();
+      closeCart();
+      showToast('🎉 感謝您的贊助！', 'success');
+      
+    } catch (error) {
+      console.error('付款失敗:', error);
+      showToast('❌ 付款失敗，請稍後再試', 'error');
+    }
+  }
+  
+  // 綁定按鈕事件
+  document.addEventListener('DOMContentLoaded', function() {
+    // 購物車結帳按鈕
+    const stripeBtn = document.getElementById('stripeCheckoutBtn');
+    if (stripeBtn) {
+      stripeBtn.addEventListener('click', handleStripeCheckout);
+    }
+    
+    // 原本的結帳按鈕（可選）
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', handleStripeCheckout);
+    }
+    
+    // 贊助按鈕
+    const donateBtn = document.getElementById('donateBtn');
+    if (donateBtn) {
+      donateBtn.addEventListener('click', function() {
+        window.open('https://buy.stripe.com/test_14A5kEf4k1dQ94G2yT0Ny00', '_blank');
+        showToast('💳 感謝您的支持！', 'success');
+      });
+    }
+  });
+</script>
 </body>
 </html>
+]
