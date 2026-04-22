@@ -4612,7 +4612,6 @@ function updateUIForLogin(user) {
     document.getElementById('userProfileBtn')?.addEventListener('click', showUserMenu);
   } else {
     authButtonContainer.innerHTML = `<a href="#" class="nav-link login-btn" id="showAuthBtn">✨ 登入 / 註冊</a>`;
-    document.getElementById('showAuthBtn')?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
     if (welcomeBanner) welcomeBanner.style.display = 'none';
     
     // 隱藏管理員 UI
@@ -4786,6 +4785,66 @@ function openAdminEditModal(id) {
         showToast('💳 感謝您的支持！', 'success');
       });
     }
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      const loginBtn = document.getElementById('showAuthBtn');
+      const authModal = document.getElementById('authModal');
+      
+      if (loginBtn) {
+        console.log('🔧 強制綁定登入按鈕');
+        loginBtn.onclick = function(e) {
+          e.preventDefault();
+          console.log('✅ 登入按鈕被點擊');
+          if (authModal) {
+            authModal.classList.add('active');
+            document.getElementById('loginEmail')?.focus();
+          }
+        };
+      }
+      
+      // 關閉按鈕
+      const closeBtn = document.getElementById('closeAuthBtn');
+      if (closeBtn) {
+        closeBtn.onclick = function() {
+          if (authModal) authModal.classList.remove('active');
+        };
+      }
+      
+      // 點擊背景關閉
+      if (authModal) {
+        authModal.onclick = function(e) {
+          if (e.target === authModal) {
+            authModal.classList.remove('active');
+          }
+        };
+      }
+      
+      // 切換到註冊
+      const switchToRegister = document.getElementById('switchToRegister');
+      if (switchToRegister) {
+        switchToRegister.onclick = function() {
+          document.getElementById('loginForm').style.display = 'none';
+          document.getElementById('registerForm').style.display = 'flex';
+          document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+          document.querySelector('[data-tab="register"]').classList.add('active');
+        };
+      }
+      
+      // 切換到登入
+      const switchToLogin = document.getElementById('switchToLogin');
+      if (switchToLogin) {
+        switchToLogin.onclick = function() {
+          document.getElementById('loginForm').style.display = 'flex';
+          document.getElementById('registerForm').style.display = 'none';
+          document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+          document.querySelector('[data-tab="login"]').classList.add('active');
+        };
+      }
+    }, 500);
   });
 </script>
 </body>
