@@ -4326,11 +4326,17 @@ function handleCredentialResponse(response) {
 
       function openModal() { modal.classList.add('active'); setActiveTab('login'); resetRegistrationForm(); }
       function closeModal() { 
-        const authModal = document.getElementById('authModal');
-        if (authModal) {
-          authModal.classList.remove('active');
-        }
-      }
+  // 關閉登入模態框
+  const authModal = document.getElementById('authModal');
+  if (authModal) authModal.classList.remove('active');
+  
+  // 關閉商品模態框
+  const productModal = document.getElementById('productModal');
+  if (productModal) productModal.classList.remove('active');
+  
+  // 重置編輯狀態
+  editingProductId = null;
+}
       
       function setActiveTab(tabId) {
         tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
