@@ -4640,7 +4640,22 @@ function handleCredentialResponse(response) {
         });
 
         document.addEventListener('click', (e) => { if(e.target.id==='showAuthBtn'||e.target.closest('#showAuthBtn')){ e.preventDefault(); openModal(); } });
+       
+        // 關閉登入模態框按鈕 (✕)
+       const closeAuthBtn = document.getElementById('closeAuthBtn');
+      if (closeAuthBtn) {
+      closeAuthBtn.addEventListener('click', closeModal);
+      console.log('✅ 登入關閉按鈕已綁定');
+      }
 
+       // 點擊背景關閉登入模態框
+        const authModal = document.getElementById('authModal');
+       if (authModal) {
+       authModal.addEventListener('click', (e) => {
+       if (e.target === authModal) closeModal();
+       });
+       console.log('✅ 登入背景關閉已綁定');
+       }
         
         tabs.forEach(t => t.addEventListener('click', () => setActiveTab(t.dataset.tab)));
         document.getElementById('switchToRegister')?.addEventListener('click', () => setActiveTab('register'));
