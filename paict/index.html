@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -2314,13 +2314,13 @@
 
 .modal-card {
   width: 100%;
-  max-width: 500px;
+  max-width: 380px;  /* 從 500px 改為 380px */
   background: rgba(10, 18, 30, 0.95);
   border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 28px;
-  padding: 28px;
+  border-radius: 24px;  /* 稍微縮小圓角 */
+  padding: 20px;  /* 從 28px 改為 20px */
   backdrop-filter: blur(25px);
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
 }
 
@@ -2332,7 +2332,7 @@
 }
 
 .modal-header h3 {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   background: linear-gradient(135deg, #FFD700, #ff3b5c);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2350,8 +2350,8 @@
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 18px;
+  gap: 4px;
+  margin-bottom: 14px;
 }
 
 .input-group label {
@@ -2403,14 +2403,15 @@
 
 .modal-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 .modal-actions .btn {
   flex: 1;
-  padding: 14px;
+  padding: 10px;
   border-radius: 40px;
+  font-size: 0.9rem;
 }
 /* ========== FiveM 按鈕強化效果 ========== */
 .btn-game {
