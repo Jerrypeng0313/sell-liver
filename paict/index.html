@@ -3790,7 +3790,7 @@ async function loadProductsFromCloud() {
   
   console.log('📦 從 JSONBin 載入資料...');
   try {
-    const response = await fetch(JSONBIN_URL, {
+    const response = await fetch(JSONBIN_URL + '?nocache=' + Date.now(), {
       headers: { 'X-Master-Key': JSONBIN_API_KEY }
     });
     const data = await response.json();
@@ -3872,7 +3872,7 @@ async function saveToJSONBin() {
     saveTimer = setTimeout(async () => {
       try {
         console.log('🔄 同步前，正在獲取雲端最新數據...');
-        const getResponse = await fetch(JSONBIN_URL, {
+        const getResponse = await fetch(JSONBIN_URL + '?nocache=' + Date.now(), {
           headers: { 'X-Master-Key': JSONBIN_API_KEY }
         });
         
