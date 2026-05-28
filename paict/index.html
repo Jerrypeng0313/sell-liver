@@ -3866,13 +3866,52 @@ function renderAllProducts() {
 // 儲存到 JSONBin（節流版本）
 let saveTimer = null;
 async function saveToJSONBin() {
-  // 清除之前的計時器，避免短時間內多次儲存
   if (saveTimer) clearTimeout(saveTimer);
   
   return new Promise((resolve) => {
     saveTimer = setTimeout(async () => {
       try {
-        // 先儲存到 localStorage
+        console.log('🔄 同步前，正在獲取雲端最新數據...');
+        const getResponse = await fetch(JSONBIN_URL, {
+          headers: { 'X-Master-Key': JSONBIN_API_KEY }
+        });
+        
+        if (getResponse.ok) {
+          const cloudData = await getResponse.json();
+          if (cloudData.record) {
+            const cloudProducts = cloudData.record.products || [];
+            const cloudOrders = cloudData.record.orders || [];
+            
+            // 1. 合併商品：
+            // 如果當前用戶非管理員，直接以雲端商品為基準（防止普通用戶下單時覆蓋管理員新增的商品）
+            // 如果當前用戶是管理員，將雲端上本地沒有的商品合併進來（避免多位管理員相互覆蓋）
+            if (!isAdmin(currentUser)) {
+              products = cloudProducts;
+            } else {
+              cloudProducts.forEach(cp => {
+                // 如果這個商品在雲端有，但本地沒有：
+                // 且這個商品「不曾被本機刪除過」，才把它合併進來（代表它是別的管理員新增的商品）
+                if (!products.find(lp => Number(lp.id) === Number(cp.id))) {
+                  if (!deletedProductIds.includes(Number(cp.id))) {
+                    products.push(cp);
+                  }
+                }
+              });
+            }
+            
+            // 2. 合併訂單：將本地的新訂單與雲端的訂單合併（去重）
+            const mergedOrders = [...allOrders];
+            cloudOrders.forEach(co => {
+              if (!mergedOrders.find(lo => lo.id === co.id)) {
+                mergedOrders.push(co);
+              }
+            });
+            mergedOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+            allOrders = mergedOrders;
+          }
+        }
+        
+        // 儲存到 localStorage 快取
         localStorage.setItem('raceShopProducts', JSON.stringify(products));
         localStorage.setItem('raceShopOrdersAll', JSON.stringify(allOrders));
         
@@ -3892,15 +3931,25 @@ async function saveToJSONBin() {
         if (response.ok) {
           console.log('✅ 已同步到雲端');
           lastCloudUpdate = Date.now();
+          renderAllProducts();
+          if (isAdmin(currentUser)) {
+            renderAdminOrders();
+          }
+          // 同步成功後，清空已刪除商品 ID 快取
+          deletedProductIds = [];
+          showToast('☁️ 資料已同步至雲端！', 'success');
           resolve(true);
         } else {
+          console.error('❌ 雲端同步失敗，狀態碼:', response.status);
+          showToast('⚠️ 雲端儲存失敗！請檢查您的帳號權限或 API 限制。', 'error');
           resolve(false);
         }
       } catch (error) {
         console.error('❌ 同步失敗:', error);
+        showToast('❌ 雲端同步連線失敗，請檢查網路連線！', 'error');
         resolve(false);
       }
-    }, 500); // 延遲 0.5 秒，避免頻繁儲存
+    }, 500);
   });
 }
 
@@ -3961,8 +4010,11 @@ async function saveAdminProduct() {
 async function deleteProduct(id) {
   if (!confirm('確定要刪除嗎？')) return;
   
+  // 記錄被刪除的商品 ID
+  deletedProductIds.push(Number(id));
+  
   // 1. 立即更新本地資料
-  products = products.filter(p => p.id !== id);
+  products = products.filter(p => Number(p.id) !== Number(id));
   
   // 2. 立即儲存到 localStorage
   localStorage.setItem('raceShopProducts', JSON.stringify(products));
@@ -3977,8 +4029,9 @@ async function deleteProduct(id) {
   saveToJSONBin();
 }
 
-// 管理員商品編輯狀態
+// 管理員商品編輯與刪除狀態
 let editingProductId = null;
+let deletedProductIds = [];
 
 // ========== 圖片處理函數 ==========
 let currentImageData = '';
