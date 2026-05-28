@@ -5146,6 +5146,98 @@ console.log('✅ EmailJS 已初始化');
 const JSONBIN_BIN_ID = '69e724e936566621a8d624f2';
 const JSONBIN_API_KEY = '$2a$10$pnKDz7Q8DZeK0kMNrHh98.MYVmVZibSZtrsu9Ncdh7OBuPcnJ..SW';
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const CLOUD_STATE_CACHE_KEY = 'starryCloudStateCache';
+let cloudState = { version: 1, accounts: {} };
+let isLoadingCloudState = false;
+let isSavingCloudState = false;
+
+function getAccountKey() {
+  const savedUser = currentUser || (() => { try { return JSON.parse(safeGetItem('raceUIUser') || '{}'); } catch (e) { return null; } })();
+  return (savedUser?.email || savedUser?.googleEmail || 'guest').toLowerCase();
+}
+
+function getDefaultAccountState() {
+  return {
+    notifications: [],
+    checkin: { lastDate: '', streak: 0, history: [] },
+    vipTokens: 3,
+    vipPrizes: [],
+    lastFreeTokenClaim: 0,
+    flashSales: {},
+    reviews: {},
+  };
+}
+
+function getActiveAccountState() {
+  const key = getAccountKey();
+  if (!cloudState.accounts[key]) cloudState.accounts[key] = getDefaultAccountState();
+  return cloudState.accounts[key];
+}
+
+function applyAccountStateToUI() {
+  const state = getActiveAccountState();
+  notifications = Array.isArray(state.notifications) ? state.notifications : [];
+  checkinData = state.checkin || { lastDate: '', streak: 0, history: [] };
+  vipTokens = parseInt(state.vipTokens) || 3;
+  vipPrizes = Array.isArray(state.vipPrizes) ? state.vipPrizes : [];
+  lastFreeTokenClaim = parseInt(state.lastFreeTokenClaim) || 0;
+  renderNotifDot();
+  renderCheckinGrid();
+  updateTokenDisplay();
+}
+
+function captureUIStateToAccount() {
+  const state = getActiveAccountState();
+  state.notifications = notifications.slice(0, 50);
+  state.checkin = checkinData;
+  state.vipTokens = vipTokens;
+  state.vipPrizes = vipPrizes;
+  state.lastFreeTokenClaim = lastFreeTokenClaim;
+}
+
+async function loadCloudState() {
+  if (isLoadingCloudState) return;
+  isLoadingCloudState = true;
+  try {
+    const cached = safeGetItem(CLOUD_STATE_CACHE_KEY);
+    if (cached) {
+      cloudState = JSON.parse(cached);
+    }
+    const res = await fetch(`${JSONBIN_URL}?nocache=${Date.now()}`, { headers: { 'X-Master-Key': JSONBIN_API_KEY } });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.record?.accounts) cloudState = data.record;
+    }
+  } catch (e) {
+    console.warn('載入雲端狀態失敗', e);
+  }
+  safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
+  isLoadingCloudState = false;
+  applyAccountStateToUI();
+}
+
+let cloudSaveTimer = null;
+function scheduleSaveCloudState() {
+  if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(() => saveCloudState(), 600);
+}
+
+async function saveCloudState() {
+  if (isSavingCloudState) return;
+  isSavingCloudState = true;
+  try {
+    captureUIStateToAccount();
+    safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
+    await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+      body: JSON.stringify(cloudState)
+    });
+  } catch (e) {
+    console.warn('儲存雲端狀態失敗', e);
+  }
+  isSavingCloudState = false;
+}
 
 // ========== 🔒 密碼雜湊 (SHA-256 via Web Crypto API) ==========
 // 密碼在存入 localStorage 前會先經過 SHA-256 單向雜湊，
@@ -8360,9 +8452,15 @@ function updateVipProfileCard() {
 // ==========================================
 let notifications = [];
 function loadNotifications() {
-  try { notifications = JSON.parse(safeGetItem('starryNotifications') || '[]'); } catch(e) { notifications = []; }
+  const state = getActiveAccountState();
+  notifications = Array.isArray(state.notifications) ? state.notifications : [];
 }
-function saveNotifications() { safeSetItem('starryNotifications', JSON.stringify(notifications.slice(0, 50))); }
+function saveNotifications() {
+  const state = getActiveAccountState();
+  state.notifications = notifications.slice(0, 50);
+  safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
+  scheduleSaveCloudState();
+}
 function addNotification(type, msg) {
   loadNotifications();
   const icons = { order: '\ud83d\udce6', vip: '\ud83d\udc8e', prize: '\ud83c\udf89', level: '\ud83c\udf96\ufe0f', checkin: '\ud83c\udf81', system: '\u2139\ufe0f' };
@@ -8602,8 +8700,16 @@ function updateXPLevelSection() {
 // ===== 💬 商品評價系統 (Product Reviews) =====
 // ==========================================
 let reviews = {};
-function loadReviews() { try { reviews = JSON.parse(safeGetItem('starryReviews') || '{}'); } catch(e) { reviews = {}; } }
-function saveReviews() { safeSetItem('starryReviews', JSON.stringify(reviews)); }
+function loadReviews() {
+  const state = getActiveAccountState();
+  reviews = state.reviews || {};
+}
+function saveReviews() {
+  const state = getActiveAccountState();
+  state.reviews = reviews;
+  safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
+  scheduleSaveCloudState();
+}
 function getReviewsForProduct(pid) { loadReviews(); return reviews[String(pid)] || []; }
 function renderReviews(pid) {
   const list = document.getElementById('detailReviewList');
@@ -8693,8 +8799,16 @@ function deleteReview(pid, idx) {
 // ===== \ud83c\udf81 \u7c3d\u5230\u6253\u5361\u7cfb\u7d71 (Daily Check-in) =====
 // ==========================================
 let checkinData = { lastDate: '', streak: 0, history: [] };
-function loadCheckin() { try { checkinData = JSON.parse(safeGetItem('starryCheckin') || '{"lastDate":"","streak":0,"history":[]}'); } catch(e) { checkinData = { lastDate:'', streak:0, history:[] }; } }
-function saveCheckin() { safeSetItem('starryCheckin', JSON.stringify(checkinData)); }
+function loadCheckin() {
+  const state = getActiveAccountState();
+  checkinData = state.checkin || { lastDate: '', streak: 0, history: [] };
+}
+function saveCheckin() {
+  const state = getActiveAccountState();
+  state.checkin = checkinData;
+  safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
+  scheduleSaveCloudState();
+}
 function getTodayStr() { return new Date().toISOString().slice(0,10); }
 function renderCheckinGrid() {
   const grid = document.getElementById('checkinGrid');
