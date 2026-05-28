@@ -3733,6 +3733,36 @@ textarea.input-field {
     (function(){
       'use strict';
 
+      // 安全的 localStorage 包裝器，避免私密瀏覽或儲存空間額滿時拋出異常中斷執行
+      function safeSetItem(key, value) {
+        try {
+          localStorage.setItem(key, value);
+          return true;
+        } catch (e) {
+          console.warn(`[localStorage] 寫入失敗 (key: ${key}):`, e);
+          return false;
+        }
+      }
+
+      function safeGetItem(key) {
+        try {
+          return localStorage.getItem(key);
+        } catch (e) {
+          console.warn(`[localStorage] 讀取失敗 (key: ${key}):`, e);
+          return null;
+        }
+      }
+
+      function safeRemoveItem(key) {
+        try {
+          localStorage.removeItem(key);
+          return true;
+        } catch (e) {
+          console.warn(`[localStorage] 刪除失敗 (key: ${key}):`, e);
+          return false;
+        }
+      }
+
 // DOM 元素（模態框相關）- 請添加到變數宣告區
 const productModal = document.getElementById('productModal');
 const modalTitle = document.getElementById('modalTitle');
@@ -3790,9 +3820,18 @@ async function loadProductsFromCloud() {
   
   console.log('📦 從 JSONBin 載入資料...');
   try {
-    const response = await fetch(JSONBIN_URL, {
+    const response = await fetch(`${JSONBIN_URL}?nocache=${Date.now()}`, {
       headers: { 'X-Master-Key': JSONBIN_API_KEY }
     });
+    
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error(`❌ 載入失敗 (HTTP ${response.status}):`, errText);
+      showToast(`❌ 從雲端載入資料失敗 (HTTP ${response.status})`, 'error');
+      isLoadingFromCloud = false;
+      return;
+    }
+    
     const data = await response.json();
     
     if (data.record) {
@@ -3807,11 +3846,12 @@ async function loadProductsFromCloud() {
       console.log('✅ 成功載入', products.length, '件商品,', allOrders.length, '筆訂單');
       
       // 儲存到 localStorage 快取
-      localStorage.setItem('raceShopProducts', JSON.stringify(products));
-      localStorage.setItem('raceShopOrdersAll', JSON.stringify(allOrders));
+      safeSetItem('raceShopProducts', JSON.stringify(products));
+      safeSetItem('raceShopOrdersAll', JSON.stringify(allOrders));
     }
   } catch (error) {
     console.error('❌ 載入失敗:', error);
+    showToast('❌ 從雲端載入資料失敗，請檢查網路連線', 'error');
   }
   
   isLoadingFromCloud = false;
@@ -3825,8 +3865,8 @@ async function loadProductsFromCloud() {
 
 // 從 localStorage 載入快取（瞬間完成）
 function loadProductsFromCache() {
-  const cachedProducts = localStorage.getItem('raceShopProducts');
-  const cachedOrders = localStorage.getItem('raceShopOrdersAll');
+  const cachedProducts = safeGetItem('raceShopProducts');
+  const cachedOrders = safeGetItem('raceShopOrdersAll');
   if (cachedProducts) {
     try {
       products = JSON.parse(cachedProducts);
@@ -3870,10 +3910,11 @@ async function saveToJSONBin() {
   
   return new Promise((resolve) => {
     saveTimer = setTimeout(async () => {
+      // 嘗試儲存到本地快取，但不影響雲端儲存
+      safeSetItem('raceShopProducts', JSON.stringify(products));
+      safeSetItem('raceShopOrdersAll', JSON.stringify(allOrders));
+      
       try {
-        localStorage.setItem('raceShopProducts', JSON.stringify(products));
-        localStorage.setItem('raceShopOrdersAll', JSON.stringify(allOrders));
-        
         const response = await fetch(JSONBIN_URL, {
           method: 'PUT',
           headers: {
@@ -3892,10 +3933,15 @@ async function saveToJSONBin() {
           renderAllProducts();
           resolve(true);
         } else {
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.message || `HTTP ${response.status}`;
+          console.error('❌ 同步失敗 (API 錯誤):', errMsg);
+          showToast(`❌ 雲端同步失敗: ${errMsg}`, 'error');
           resolve(false);
         }
       } catch (error) {
         console.error('❌ 同步失敗:', error);
+        showToast('❌ 雲端連線失敗，請檢查網路連線', 'error');
         resolve(false);
       }
     }, 500);
@@ -3943,7 +3989,7 @@ async function saveAdminProduct() {
   }
   
   // 2. 立即儲存到 localStorage
-  localStorage.setItem('raceShopProducts', JSON.stringify(products));
+  safeSetItem('raceShopProducts', JSON.stringify(products));
   
   // 3. 立即關閉模態框並渲染
   closeModal();
@@ -3966,7 +4012,7 @@ async function deleteProduct(id) {
   products = products.filter(p => Number(p.id) !== Number(id));
   
   // 2. 立即儲存到 localStorage
-  localStorage.setItem('raceShopProducts', JSON.stringify(products));
+  safeSetItem('raceShopProducts', JSON.stringify(products));
   
   // 3. 立即渲染
   renderAdminProducts();
@@ -4022,26 +4068,80 @@ function setPreviewImage(imageData) {
   }
 }
 
-// 處理圖片上傳
+// 處理圖片上傳（加上 Canvas 壓縮，將圖片壓縮至 15-30KB，防止超出 JSONBin 的 100KB 限制）
 function handleImageUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   
-  if (file.size > 2 * 1024 * 1024) {
-    showToast('❌ 圖片不能超過 2MB', 'error');
-    return;
+  // 顯示壓縮中狀態，防止使用者此時按儲存
+  const saveProductBtn = document.getElementById('saveProductBtn');
+  if (saveProductBtn) {
+    saveProductBtn.disabled = true;
+    saveProductBtn.textContent = '⌛ 壓縮中...';
   }
   
   const reader = new FileReader();
   reader.onload = (e) => {
-    currentImageData = e.target.result;
-    const imagePreview = document.getElementById('imagePreview');
-    const clearImageBtn = document.getElementById('clearImageBtn');
-    if (imagePreview) {
-      imagePreview.src = currentImageData;
-      imagePreview.style.fontSize = '0';
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      // 限制最大寬度為 320px
+      const max_size = 320;
+      if (width > height) {
+        if (width > max_size) {
+          height *= max_size / width;
+          width = max_size;
+        }
+      } else {
+        if (height > max_size) {
+          width *= max_size / height;
+          height = max_size;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // 壓縮成 jpeg，品質設為 0.6
+      currentImageData = canvas.toDataURL('image/jpeg', 0.6);
+      
+      const imagePreview = document.getElementById('imagePreview');
+      const clearImageBtn = document.getElementById('clearImageBtn');
+      if (imagePreview) {
+        imagePreview.src = currentImageData;
+        imagePreview.style.fontSize = '0';
+        imagePreview.textContent = '';
+      }
+      if (clearImageBtn) clearImageBtn.style.display = 'block';
+      console.log('📷 圖片已壓縮，大小:', Math.round(currentImageData.length / 1024), 'KB');
+      
+      // 恢復儲存按鈕狀態
+      if (saveProductBtn) {
+        saveProductBtn.disabled = false;
+        saveProductBtn.textContent = '儲存';
+      }
+    };
+    img.onerror = () => {
+      console.error('❌ 圖片載入失敗');
+      if (saveProductBtn) {
+        saveProductBtn.disabled = false;
+        saveProductBtn.textContent = '儲存';
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.onerror = () => {
+    console.error('❌ 讀起檔案失敗');
+    if (saveProductBtn) {
+      saveProductBtn.disabled = false;
+      saveProductBtn.textContent = '儲存';
     }
-    if (clearImageBtn) clearImageBtn.style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
@@ -4088,7 +4188,7 @@ productModal?.addEventListener('click', (e) => {
 // saveProductBtn?.addEventListener('click', saveAdminProduct);
 
       // ========== 購物車 ==========
-      let cart = JSON.parse(localStorage.getItem('raceCart') || '[]');
+      let cart = JSON.parse(safeGetItem('raceCart') || '[]');
 
       // ========== 競速數據 ==========
       const SPEED_POOL = [287, 312, 328, 345, 299, 356, 334, 318, 370, 305];
@@ -4102,19 +4202,19 @@ productModal?.addEventListener('click', (e) => {
       let countdownInterval = null;
 
       function initUserDB() {
-        if (!localStorage.getItem('raceUIUsers')) {
-          localStorage.setItem('raceUIUsers', JSON.stringify([]));
+        if (!safeGetItem('raceUIUsers')) {
+          safeSetItem('raceUIUsers', JSON.stringify([]));
         }
       }
       
       function getUsers() {
-        return JSON.parse(localStorage.getItem('raceUIUsers') || '[]');
+        return JSON.parse(safeGetItem('raceUIUsers') || '[]');
       }
       
       function saveUser(user) {
         const users = getUsers();
         users.push(user);
-        localStorage.setItem('raceUIUsers', JSON.stringify(users));
+        safeSetItem('raceUIUsers', JSON.stringify(users));
       }
       
       function findUserByEmail(email) {
@@ -4122,7 +4222,7 @@ productModal?.addEventListener('click', (e) => {
       }
 
       try {
-        const savedUser = localStorage.getItem('raceUIUser');
+        const savedUser = safeGetItem('raceUIUser');
         if (savedUser) currentUser = JSON.parse(savedUser);
       } catch (e) {}
 
@@ -4276,7 +4376,7 @@ productModal?.addEventListener('click', (e) => {
       }
 
       function saveCart() {
-        localStorage.setItem('raceCart', JSON.stringify(cart));
+        safeSetItem('raceCart', JSON.stringify(cart));
         renderCart();
         updateCartCount();
       }
@@ -4540,7 +4640,7 @@ function openSettingsModal() {
                 if (currentUser.loginMethod === 'google') {
                     currentUser.loginMethod = 'email';
                 }
-                localStorage.setItem('raceUIUser', JSON.stringify(currentUser));
+                safeSetItem('raceUIUser', JSON.stringify(currentUser));
                 showToast('🔓 已解除 Google 綁定', 'info');
                 overlay.remove();
                 openSettingsModal(); // 重新開啟刷新狀態
@@ -4617,7 +4717,7 @@ function openSettingsModal() {
     saveBtn.style.cssText = 'flex:1;padding:12px;border-radius:40px;border:none;background:linear-gradient(135deg,#FFD700,#ff8c00);color:#05070d;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(255,215,0,0.2);';
     saveBtn.onclick = () => {
         // 儲存設置
-        localStorage.setItem('userSettings', JSON.stringify({
+        safeSetItem('userSettings', JSON.stringify({
             theme: themeSelect.value,
             notifications: notifToggle.checked,
             sound: soundToggle.checked
@@ -4665,7 +4765,7 @@ function performGoogleLinking() {
                     currentUser.googlePicture = googleUser.picture;
                     
                     // 如果原本是 Email 登入，保留 Email 登入方式
-                    localStorage.setItem('raceUIUser', JSON.stringify(currentUser));
+                    safeSetItem('raceUIUser', JSON.stringify(currentUser));
                     
                     // 同步更新用戶資料庫
                     const users = getUsers();
@@ -4673,7 +4773,7 @@ function performGoogleLinking() {
                     if (userIndex !== -1) {
                         users[userIndex].linkedGoogle = true;
                         users[userIndex].googleEmail = googleUser.email;
-                        localStorage.setItem('raceUIUsers', JSON.stringify(users));
+                        safeSetItem('raceUIUsers', JSON.stringify(users));
                     }
                     
                     showToast(`✅ 成功綁定 Google 帳號 (${googleUser.email})`, 'success');
@@ -4719,7 +4819,7 @@ function performGoogleLinking() {
       function handleLogout() {
     if (window.google?.accounts) window.google.accounts.id.disableAutoSelect();
     currentUser = null;
-    localStorage.removeItem('raceUIUser');
+    safeRemoveItem('raceUIUser');
     updateUIForLogin(null);
     showToast('👋 已登出賣肝人生', 'info');
 }
@@ -4785,7 +4885,7 @@ function performGoogleLinking() {
     loginMethod:'email' 
   };
   currentUser = loggedUser;
-  localStorage.setItem('raceUIUser', JSON.stringify(loggedUser));
+  safeSetItem('raceUIUser', JSON.stringify(loggedUser));
   updateUIForLogin(loggedUser);
   
   closeModal();
@@ -4828,7 +4928,7 @@ function performGoogleLinking() {
         saveUser({ name:pendingRegistration.name, email:pendingRegistration.email, password:hashedPwd });
         const loggedUser = { email:pendingRegistration.email, name:pendingRegistration.name, picture:`https://ui-avatars.com/api/?name=${encodeURIComponent(pendingRegistration.name)}&background=00c2ff&color=fff`, loginMethod:'email' };
         currentUser = loggedUser;
-        localStorage.setItem('raceUIUser', JSON.stringify(loggedUser));
+        safeSetItem('raceUIUser', JSON.stringify(loggedUser));
         updateUIForLogin(loggedUser);
         resetRegistrationForm();
         closeModal();
@@ -4884,7 +4984,7 @@ function handleCredentialResponse(response) {
     }
     
     currentUser = user;
-    localStorage.setItem('raceUIUser', JSON.stringify(user));
+    safeSetItem('raceUIUser', JSON.stringify(user));
     updateUIForLogin(user);
     closeModal();
     
@@ -5275,7 +5375,7 @@ function getOrders() {
   if (!email) return [];
   let local = [];
   try {
-    local = JSON.parse(localStorage.getItem(`orders_${email}`) || '[]');
+    local = JSON.parse(safeGetItem(`orders_${email}`) || '[]');
   } catch {}
   
   // 過濾出雲端上屬於該用戶的訂單
@@ -5332,9 +5432,9 @@ function recordOrder(cartItems, playerId = '', discordId = '', paymentMethod = '
   allOrders.unshift(order);
   
   // 同時備份存入個人 local
-  const personalOrders = JSON.parse(localStorage.getItem(`orders_${email}`) || '[]');
+  const personalOrders = JSON.parse(safeGetItem(`orders_${email}`) || '[]');
   personalOrders.unshift(order);
-  localStorage.setItem(`orders_${email}`, JSON.stringify(personalOrders));
+  safeSetItem(`orders_${email}`, JSON.stringify(personalOrders));
   
   console.log('📦 訂單已記錄:', orderId);
   
