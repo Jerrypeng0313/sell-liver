@@ -3961,71 +3961,6 @@ textarea.input-field {
 
 }
 
-/* ===== 🎁 每日簽到首頁入口卡片 CSS ===== */
-.checkin-entry-card {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 154, 68, 0.1));
-  border: 1px solid rgba(255, 215, 0, 0.25);
-  border-radius: 20px;
-  padding: 20px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.05);
-  flex-wrap: wrap;
-  gap: 16px;
-  transition: all 0.3s ease;
-  margin-bottom: 28px;
-}
-.checkin-entry-card:hover {
-  border-color: rgba(255, 215, 0, 0.4);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.12);
-  transform: translateY(-2px);
-}
-.checkin-entry-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.checkin-entry-title {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.checkin-entry-title h3 {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--gold);
-}
-.checkin-entry-title p {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-top: 2px;
-}
-.checkin-entry-icon {
-  font-size: 32px;
-  background: rgba(255, 215, 0, 0.15);
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
-}
-.checkin-entry-status {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.checkin-entry-status strong {
-  color: var(--gold);
-  font-size: 1.1rem;
-}
   </style>
 </head>
 <body>
@@ -4078,7 +4013,6 @@ textarea.input-field {
   <a class="nav-link active" data-page="dashboard">🏠 首頁</a>
   <a class="nav-link" data-page="shop">🛒 商店</a>
   <a class="nav-link" data-page="vip">💎 VIP 專區</a>
-  <a class="nav-link" id="navCheckinBtn" style="cursor: pointer;">🎁 每日簽到</a>
   <a class="nav-link admin-only" data-page="admin" style="display: none;" id="adminNavLink">👑 管理</a>
   
   <div class="cart-icon" id="cartToggleBtn">
@@ -4540,6 +4474,25 @@ textarea.input-field {
   </div>
 </section>
 
+<!-- 🎁 每日簽到首頁入口卡片 -->
+<section style="margin-bottom: 28px;">
+  <div class="checkin-entry-card" id="checkinEntryCard">
+    <div class="checkin-entry-content">
+      <div class="checkin-entry-title">
+        <span class="checkin-entry-icon">🎁</span>
+        <div>
+          <h3>每日簽到福利</h3>
+          <p>連續簽到即可領取隨機 XP 獎勵，解鎖獨家限量大折抵券！</p>
+        </div>
+      </div>
+      <div class="checkin-entry-status" id="checkinEntryStatus">
+        🔥 連續簽到：<strong>--</strong> 天
+      </div>
+    </div>
+    <button class="btn btn-gold" id="checkinEntryBtn">🎁 立即簽到</button>
+  </div>
+</section>
+
   <!-- 熱門商品 -->
   <section class="featured-products">
     <div class="section-header">
@@ -4872,7 +4825,7 @@ textarea.input-field {
     <div style="text-align:center; margin-bottom:8px;">
       <div style="font-size:40px; margin-bottom:8px; filter:drop-shadow(0 0 20px rgba(255,215,0,0.5));">🎁</div>
       <h3 style="margin:0; font-family:var(--font-display); font-size:1.2rem; background:linear-gradient(135deg,#FFD700,#ff9a44);-webkit-background-clip:text;background-clip:text;color:transparent;">每日簽到打卡</h3>
-      <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-top:4px;">連續簽到享有豐厚獎勵！</p>
+      <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-top:4px;">每次進入網站都會提醒你簽到</p>
     </div>
     <div class="checkin-streak" id="checkinStreakDisplay">🔥 連續 0 天</div>
     <div class="checkin-grid" id="checkinGrid"></div>
@@ -4880,7 +4833,7 @@ textarea.input-field {
       每日：+20 XP &nbsp;|&nbsp; 第3天：+3 代幣 &nbsp;|&nbsp; 第7天：VIP 折扣券
     </div>
     <button id="checkinBtn" class="btn btn-gold" style="width:100%;">✅ 立即簽到</button>
-    <button id="closeCheckinBtn" style="width:100%; margin-top:8px; background:transparent; border:none; color:rgba(255,255,255,0.3); font-size:12px; cursor:pointer; padding:6px;">稍後再說</button>
+    <button id="closeCheckinBtn" style="width:100%; margin-top:8px; background:transparent; border:none; color:rgba(255,255,255,0.3); font-size:12px; cursor:pointer; padding:6px;">關閉後今天不再提醒</button>
   </div>
 </div>
 
@@ -8760,6 +8713,12 @@ function renderCheckinGrid() {
   }
   grid.innerHTML = days.join('');
 }
+function shouldSuppressCheckinToday() {
+  return safeGetItem('starryCheckinSnooze') === getTodayStr();
+}
+function suppressCheckinToday() {
+  safeSetItem('starryCheckinSnooze', getTodayStr());
+}
 function openCheckinModal() {
   loadCheckin();
   renderCheckinGrid();
@@ -8767,6 +8726,7 @@ function openCheckinModal() {
   if (modal) modal.classList.add('open');
 }
 function closeCheckinModal() {
+  suppressCheckinToday();
   const modal = document.getElementById('checkinModal');
   if (modal) modal.classList.remove('open');
 }
@@ -8800,12 +8760,9 @@ function doCheckin() {
   if (btn) { btn.disabled = true; btn.textContent = '\u2705 \u4eca\u65e5\u5df2\u7c3d\u5230'; }
 }
 function checkAutoShowCheckin() {
-  if (!currentUser) return;
   loadCheckin();
-  const today = getTodayStr();
-  if (checkinData.lastDate !== today) {
-    setTimeout(openCheckinModal, 1500);
-  }
+  if (shouldSuppressCheckinToday()) return;
+  setTimeout(openCheckinModal, 300);
 }
 
 function handleAdminMenuSwitch(view) {
@@ -8871,7 +8828,8 @@ function initAllNewFeatures() {
       addNotification('vip', `\u26a0\ufe0f \u60a8的 VIP \u5c07\u65bc ${days} \u5929\u5f8c\u5230\u671f\uff01\u8acb\u5c3d\u65e9\u7e8c\u7e6d\u3002`);
     }
   }
-  // 登入後自動簽到提示\n  checkAutoShowCheckin();
+  // 開頁即自動提示簽到
+  checkAutoShowCheckin();
   // XP 等級整合到 VIP 卡
   updateXPLevelSection();
 }
