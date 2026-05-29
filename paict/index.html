@@ -4171,6 +4171,159 @@ textarea.input-field {
 }
 /* ================================== */
 
+
+/* ===== 🎁 Daily Check-in Premium UI ===== */
+.checkin-entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(20, 25, 45, 0.7), rgba(10, 15, 30, 0.9));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.checkin-entry-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 215, 0, 0.15) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.checkin-entry-card:hover::before {
+  opacity: 1;
+}
+.checkin-entry-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 15px 50px rgba(255, 215, 0, 0.15), inset 0 0 30px rgba(255, 215, 0, 0.1);
+}
+.checkin-entry-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1;
+}
+.checkin-entry-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.checkin-entry-icon {
+  font-size: 36px;
+  filter: drop-shadow(0 0 15px rgba(255,215,0,0.6));
+  animation: floatCheckin 3s ease-in-out infinite;
+}
+@keyframes floatCheckin {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-6px) rotate(5deg); }
+}
+.checkin-entry-title h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #FFF, #FFD700);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.checkin-entry-title p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+.checkin-entry-status {
+  display: inline-block;
+  background: rgba(255, 154, 68, 0.15);
+  border: 1px solid rgba(255, 154, 68, 0.3);
+  padding: 6px 14px;
+  border-radius: 40px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ff9a44;
+  box-shadow: 0 0 15px rgba(255, 154, 68, 0.2);
+}
+#checkinEntryBtn {
+  z-index: 1;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FFD700, #ff9a44);
+  color: #000;
+  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+  transition: all 0.3s;
+}
+#checkinEntryBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+}
+
+.checkin-streak-bar-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  margin: 16px 0;
+  overflow: hidden;
+  position: relative;
+}
+.checkin-streak-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700, #ff9a44);
+  width: 0%;
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+.checkin-day.checked {
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,154,68,0.15));
+  border-color: rgba(255,215,0,0.5);
+  color: #FFD700;
+  box-shadow: 0 0 15px rgba(255,215,0,0.2) inset;
+}
+.checkin-day.checked::after {
+  content: '✓';
+  position: absolute;
+  top: -6px; right: -6px;
+  background: #FFD700;
+  color: #000;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  animation: popIn 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  80% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #FFD700;
+  animation: confettiFall 2s ease-out forwards;
+  z-index: 9999;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0); opacity: 1; }
+  100% { transform: translateY(200px) rotate(360deg); opacity: 0; }
+}
+/* ================================== */
+
 </style>
 </head>
 <body>
@@ -5038,6 +5191,21 @@ textarea.input-field {
     <button id="closeCheckinBtn" style="width:100%; margin-top:12px; background:transparent; border:none; color:rgba(255,255,255,0.3); font-size:12px; cursor:pointer; padding:8px; transition:color 0.2s; position:relative; z-index:2;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">稍後再說</button>
   </div>
 </div>
+    
+    <div class="checkin-streak-bar-container">
+        <div class="checkin-streak-bar" id="checkinStreakBar"></div>
+    </div>
+    
+    <div class="checkin-grid" id="checkinGrid" style="position:relative; z-index:2;"></div>
+    
+    <div style="background:rgba(20,25,45,0.5); border:1px solid rgba(255,215,0,0.15); border-radius:14px; padding:12px; margin-bottom:20px; font-size:12px; color:rgba(255,255,255,0.7); line-height:1.6; text-align:center; position:relative; z-index:2; box-shadow:inset 0 0 15px rgba(0,0,0,0.3);">
+      <span style="color:#FFD700; font-weight:bold;">每日:</span> +20 XP &nbsp;|&nbsp; <span style="color:#FFD700; font-weight:bold;">第3天:</span> +3 代幣 &nbsp;|&nbsp; <span style="color:#FFD700; font-weight:bold;">第7天:</span> VIP 折扣券
+    </div>
+    
+    <button id="checkinBtn" class="btn btn-gold" style="width:100%; padding:14px; font-size:1.1rem; border-radius:14px; position:relative; z-index:2;">✅ 立即簽到</button>
+    <button id="closeCheckinBtn" style="width:100%; margin-top:12px; background:transparent; border:none; color:rgba(255,255,255,0.3); font-size:12px; cursor:pointer; padding:8px; transition:color 0.2s; position:relative; z-index:2;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">稍後再說</button>
+  </div>
+</div>
 
 <!-- 手機版底部導航列 -->
 <div id="mobileTabBar">
@@ -5443,14 +5611,23 @@ async function loadProductsFromCloud() {
   
   console.log('📦 從 JSONBin 載入資料...');
   try {
+    const cachedProducts = safeGetItem('raceShopProducts');
+    if (cachedProducts) {
+      try {
+        products = JSON.parse(cachedProducts);
+        allOrders = JSON.parse(safeGetItem('raceShopOrdersAll') || '[]');
+        activeCoupons = JSON.parse(safeGetItem('raceShopPromoCodes') || '{}');
+      } catch (e) {}
+    }
+
+    const cachedCloudState = safeGetItem(CLOUD_STATE_CACHE_KEY);
+    if (cachedCloudState) cloudState = JSON.parse(cachedCloudState);
+
     const response = await fetch(`${JSONBIN_URL}?nocache=${Date.now()}`, {
       headers: { 'X-Master-Key': JSONBIN_API_KEY }
     });
     
     if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      console.error(`❌ 載入失敗 (HTTP ${response.status}):`, errText);
-      showToast(`❌ 從雲端載入資料失敗 (HTTP ${response.status})`, 'error');
       isLoadingFromCloud = false;
       return;
     }
@@ -5458,7 +5635,7 @@ async function loadProductsFromCloud() {
     const data = await response.json();
     
     if (data.record) {
-      if (data.record.products && Array.isArray(data.record.products)) {
+      if (data.record.products) {
         products = data.record.products;
         allOrders = data.record.orders || [];
         activeCoupons = data.record.promoCodes || {
@@ -5467,34 +5644,37 @@ async function loadProductsFromCloud() {
           'HARDWORK': { type: 'fixed', value: 100 },
           '肝帝特惠': { type: 'percent', value: 50 }
         };
-      } else if (Array.isArray(data.record)) {
-        // 相容舊資料格式（原本 JSONBin 只存商品陣列）
-        products = data.record;
-        allOrders = [];
-        activeCoupons = {
-          'STARRY10': { type: 'percent', value: 10 },
-          'NEW20': { type: 'percent', value: 20 },
-          'HARDWORK': { type: 'fixed', value: 100 },
-          '肝帝特惠': { type: 'percent', value: 50 }
-        };
       }
-      console.log('✅ 成功載入', products.length, '件商品,', allOrders.length, '筆訂單,', Object.keys(activeCoupons).length, '組折扣碼');
+      if (data.record.cloudState) {
+        cloudState = data.record.cloudState;
+      } else if (data.record.accounts) {
+        cloudState = data.record;
+      }
+      if (data.record.users) {
+        safeSetItem('raceUIUsers', JSON.stringify(data.record.users));
+        if (typeof currentUser !== 'undefined' && currentUser) {
+          const freshUser = data.record.users.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+          if (freshUser) {
+            currentUser = freshUser;
+            safeSetItem('raceUIUser', JSON.stringify(currentUser));
+          }
+        }
+      }
       
-      // 儲存到 localStorage 快取
       safeSetItem('raceShopProducts', JSON.stringify(products));
       safeSetItem('raceShopOrdersAll', JSON.stringify(allOrders));
       safeSetItem('raceShopPromoCodes', JSON.stringify(activeCoupons));
+      safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
     }
   } catch (error) {
     console.error('❌ 載入失敗:', error);
-    showToast('❌ 從雲端載入資料失敗，請檢查網路連線', 'error');
   }
   
   isLoadingFromCloud = false;
   
-  // 渲染畫面（只渲染一次）
+  applyAccountStateToUI();
   renderAllProducts();
-  if (isAdmin(currentUser)) {
+  if (typeof renderAdminOrders === 'function' && isAdmin(currentUser)) {
     renderAdminOrders();
   }
 }
@@ -5556,12 +5736,15 @@ async function saveToJSONBin() {
   
   return new Promise((resolve) => {
     saveTimer = setTimeout(async () => {
-      // 嘗試儲存到本地快取，但不影響雲端儲存
       safeSetItem('raceShopProducts', JSON.stringify(products));
       safeSetItem('raceShopOrdersAll', JSON.stringify(allOrders));
       safeSetItem('raceShopPromoCodes', JSON.stringify(activeCoupons));
       
       try {
+        if (typeof captureUIStateToAccount === 'function') captureUIStateToAccount();
+        safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
+        const users = JSON.parse(safeGetItem('raceUIUsers') || '[]');
+
         const response = await fetch(JSONBIN_URL, {
           method: 'PUT',
           headers: {
@@ -5571,25 +5754,21 @@ async function saveToJSONBin() {
           body: JSON.stringify({
             products: products,
             orders: allOrders,
-            promoCodes: activeCoupons
+            promoCodes: activeCoupons,
+            cloudState: cloudState,
+            users: users
           })
         });
         
         if (response.ok) {
           console.log('✅ 已同步到雲端');
           lastCloudUpdate = Date.now();
-          renderAllProducts();
+          if (typeof renderAllProducts === 'function') renderAllProducts();
           resolve(true);
         } else {
-          const errData = await response.json().catch(() => ({}));
-          const errMsg = errData.message || `HTTP ${response.status}`;
-          console.error('❌ 同步失敗 (API 錯誤):', errMsg);
-          showToast(`❌ 雲端同步失敗: ${errMsg}`, 'error');
           resolve(false);
         }
       } catch (error) {
-        console.error('❌ 同步失敗:', error);
-        showToast('❌ 雲端連線失敗，請檢查網路連線', 'error');
         resolve(false);
       }
     }, 500);
@@ -8832,10 +9011,11 @@ function addXP(amount) {
   const newLevel = getLevelInfo(newXP).level;
   if (newLevel > oldLevel) {
     const lvInfo = getLevelInfo(newXP);
-    showToast(`\ud83c\udf96\ufe0f \u5347\u7d1a\uff01\u60a8\u5df2\u6210\u70ba\u300c${lvInfo.name}\u300d\uff01`, 'success');
-    addNotification('level', `\ud83c\udf96\ufe0f \u606d\u559c\u5347\u7d1a\uff01\u60a8\u73fe\u5728\u662f\u300c${lvInfo.name}\u300d\uff01`);
+    showToast(`🎖️ 升級！您已成為「${lvInfo.name}」！`, 'success');
+    addNotification('level', `🎖️ 恭喜升級！您現在是「${lvInfo.name}」！`);
   }
   updateVipProfileCard();
+  if (typeof saveToJSONBin === 'function') saveToJSONBin();
 }
 function updateXPLevelSection() {
   const card = document.getElementById('vipProfileCard');
@@ -8965,22 +9145,51 @@ function loadCheckin() {
   checkinData = state.checkin || { lastDate: '', streak: 0, history: [] };
 }
 function getTodayStr() { return new Date().toISOString().slice(0,10); }
+function updateCheckinEntryUI() {
+  const btn = document.getElementById('checkinEntryBtn');
+  const status = document.getElementById('checkinEntryStatus');
+  if (btn && checkinData.lastDate === getTodayStr()) {
+    btn.disabled = true;
+    btn.textContent = '✅ 今日已簽到';
+    btn.style.background = 'rgba(255,255,255,0.1)';
+    btn.style.color = 'rgba(255,255,255,0.4)';
+    btn.style.boxShadow = 'none';
+  }
+  if (status) {
+    status.innerHTML = `🔥 連續簽到：<strong>${checkinData.streak}</strong> 天`;
+  }
+}
+
 function renderCheckinGrid() {
   const grid = document.getElementById('checkinGrid');
   const streakEl = document.getElementById('checkinStreakDisplay');
+  const streakBar = document.getElementById('checkinStreakBar');
   if (!grid) return;
   const today = getTodayStr();
-  if (streakEl) streakEl.innerHTML = `\ud83d\udd25 \u9023\u7e8c ${checkinData.streak} \u5929`;
+  
+  if (streakEl) streakEl.innerHTML = `🔥 連續 ${checkinData.streak} 天`;
+  
+  // 更新進度條 (0-7 天)
+  if (streakBar) {
+    const percentage = Math.min((checkinData.streak / 7) * 100, 100);
+    setTimeout(() => {
+        streakBar.style.width = `${percentage}%`;
+    }, 100); // 延遲讓動畫生效
+  }
+
   const days = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
     const ds = d.toISOString().slice(0,10);
-    const label = `${d.getMonth()+1}/${d.getDate()}`;
-    const isDone = checkinData.history.includes(ds);
     const isToday = ds === today;
-    days.push(`<div class="checkin-day ${isDone ? 'done' : ''} ${isToday && !isDone ? 'today' : ''}">${isDone ? '\u2705' : (isToday ? '\ud83d\udccd' : '\u25e6')}<span>${label}</span></div>`);
+    const isChecked = checkinData.history.includes(ds);
+    days.push(`<div class="checkin-day ${isChecked ? 'checked' : ''}" style="${isToday && !isChecked ? 'border-color:#FFD700; box-shadow:0 0 10px rgba(255,215,0,0.3);' : ''}">
+      <div style="font-size:14px; margin-bottom:4px;">${isChecked ? '✨' : (isToday ? '🎁' : '📅')}</div>
+      <div>${d.getMonth()+1}/${d.getDate()}</div>
+    </div>`);
   }
   grid.innerHTML = days.join('');
+  updateCheckinEntryUI();
 }
 function shouldSuppressCheckinToday() {
   return safeGetItem('starryCheckinSnooze') === getTodayStr();
@@ -8999,34 +9208,63 @@ function closeCheckinModal() {
   const modal = document.getElementById('checkinModal');
   if (modal) modal.classList.remove('open');
 }
+function triggerConfetti(cardElement) {
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.top = '-20px';
+    confetti.style.backgroundColor = ['#FFD700', '#ff9a44', '#fff', '#2dff9d'][Math.floor(Math.random() * 4)];
+    confetti.style.animationDuration = (Math.random() * 1 + 1) + 's';
+    confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+    cardElement.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 2500);
+  }
+}
+
 function doCheckin() {
   const today = getTodayStr();
-  if (checkinData.lastDate === today) { showToast('\u60a8\u4eca\u65e5\u5df2\u7c3d\u5230\uff01\u660e\u5929\u518d\u4f86\uff01', 'warning'); return; }
+  if (checkinData.lastDate === today) { showToast('您今日已簽到！明天再來！', 'warning'); return; }
+  
+  // 觸發撒花特效
+  const card = document.querySelector('.checkin-card');
+  if (card) triggerConfetti(card);
+  
   const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
   const yStr = yesterday.toISOString().slice(0,10);
   checkinData.streak = (checkinData.lastDate === yStr) ? checkinData.streak + 1 : 1;
   checkinData.lastDate = today;
   checkinData.history.push(today);
   if (checkinData.history.length > 30) checkinData.history = checkinData.history.slice(-30);
-  saveCheckin();
-  // \u734e\u52f5
-  addXP(20);
-  showToast('\u2705 \u7c3d\u5230\u6210\u529f\uff01+20 XP', 'success');
-  addNotification('checkin', `\ud83c\udf81 \u7c3d\u5230\u6210\u529f\uff01\u9023\u7e8c ${checkinData.streak} \u5929\uff0c+20 XP`);
+  
+  // 統一同步到 JSONBin
+  if (typeof saveToJSONBin === 'function') saveToJSONBin();
+  
+  // 獎勵
+  if (typeof addXP === 'function') addXP(20);
+  showToast('✅ 簽到成功！+20 XP', 'success');
+  addNotification('checkin', `🎁 簽到成功！連續 ${checkinData.streak} 天，+20 XP`);
+  
   if (checkinData.streak === 3) {
     if (currentUser) { let t = parseInt(safeGetItem('vipTokens') || '0'); t += 3; safeSetItem('vipTokens', String(t)); updateTokenDisplay(); }
-    showToast('\ud83c\udf89 \u9023\u7e8c3\u5929\u734e\u52f5: +3 \u4e43\u5674\u4ee3\u5e63\uff01', 'success');
+    showToast('🎉 連續3天獎勵: +3 乃噴代幣！', 'success');
   }
   if (checkinData.streak >= 7) {
     const couponCode = 'DAILY7';
     activeCoupons[couponCode] = { type:'percent', value:10 };
-    safeSetItem('raceShopPromoCodes', JSON.stringify(activeCoupons));
-    showToast('\ud83c\udf89 \u9023\u7e8c7\u5929\u7279\u5927\u734e\u52f5: VIP 10% \u6298\u6263\u5238 DAILY7\uff01', 'success');
-    addNotification('checkin', '\ud83c\udf89 \u9023\u7e8c7\u5929\u7279\u5927\u734e\u52f5\uff01\u6298\u6263\u5238 DAILY7 \u5df2\u9001\u5230\u60a8\u7684\u5e33\u6236\uff01');
+    if (typeof saveToJSONBin === 'function') saveToJSONBin();
+    showToast('🏆 連續7天解鎖專屬 9 折優惠碼: DAILY7', 'success');
   }
+  
   renderCheckinGrid();
-  const btn = document.getElementById('checkinBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '\u2705 \u4eca\u65e5\u5df2\u7c3d\u5230'; }
+  
+  const cBtn = document.getElementById('checkinBtn');
+  if (cBtn) { 
+      cBtn.disabled = true; 
+      cBtn.innerHTML = '✨ 今日已成功簽到'; 
+      cBtn.style.background = 'linear-gradient(135deg, #2dff9d, #00c8ff)';
+      cBtn.style.color = '#000';
+  }
 }
 function checkAutoShowCheckin() {
   loadCheckin();
