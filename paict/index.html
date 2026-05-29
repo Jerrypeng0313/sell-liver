@@ -4324,6 +4324,54 @@ textarea.input-field {
 }
 /* ================================== */
 
+
+/* ===== 📱 手機版深度修復 ===== */
+@media (max-width: 768px) {
+  /* 1. 隱藏上方導覽列的連結，保留底層導航 */
+  .nav-inner .nav-links {
+    display: none !important;
+  }
+  
+  /* 2. 商品列表一行 2 個 */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  
+  /* 3. 點開商品時的彈出視窗（避免超過螢幕寬度） */
+  .modal-card {
+    width: 90% !important;
+    max-width: 90% !important;
+    margin: 20px auto !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+  }
+  #productDetailModal .modal-card {
+    padding: 16px !important;
+  }
+  
+  /* 4. 每日簽到福利卡片 (按鈕跟文字擠在一起) */
+  .checkin-entry-card {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+  .checkin-entry-title {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  #checkinEntryBtn {
+    width: 100% !important;
+  }
+  
+  /* 其他可能擠壓的元素防護 */
+  .checkin-card {
+    width: 95% !important;
+    padding: 20px !important;
+  }
+}
+
 </style>
 </head>
 <body>
