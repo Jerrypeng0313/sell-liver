@@ -3961,7 +3961,217 @@ textarea.input-field {
 
 }
 
-  </style>
+  
+/* ===== 🎁 Daily Check-in Premium UI ===== */
+.checkin-entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(20, 25, 45, 0.7), rgba(10, 15, 30, 0.9));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.checkin-entry-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 215, 0, 0.15) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.checkin-entry-card:hover::before {
+  opacity: 1;
+}
+.checkin-entry-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 15px 50px rgba(255, 215, 0, 0.15), inset 0 0 30px rgba(255, 215, 0, 0.1);
+}
+.checkin-entry-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1;
+}
+.checkin-entry-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.checkin-entry-icon {
+  font-size: 36px;
+  filter: drop-shadow(0 0 15px rgba(255,215,0,0.6));
+  animation: floatCheckin 3s ease-in-out infinite;
+}
+@keyframes floatCheckin {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-6px) rotate(5deg); }
+}
+.checkin-entry-title h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #FFF, #FFD700);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.checkin-entry-title p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+.checkin-entry-status {
+  display: inline-block;
+  background: rgba(255, 154, 68, 0.15);
+  border: 1px solid rgba(255, 154, 68, 0.3);
+  padding: 6px 14px;
+  border-radius: 40px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ff9a44;
+  box-shadow: 0 0 15px rgba(255, 154, 68, 0.2);
+}
+#checkinEntryBtn {
+  z-index: 1;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FFD700, #ff9a44);
+  color: #000;
+  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+  transition: all 0.3s;
+}
+#checkinEntryBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+}
+
+/* Modal Check-in UI Upgrades */
+#checkinModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(16px);
+  z-index: 3000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+#checkinModal.open { display: flex; }
+.checkin-card {
+  background: linear-gradient(145deg, rgba(20,25,45,0.95), rgba(10,12,20,0.98));
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 32px;
+  padding: 32px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 50px rgba(255,215,0,0.1) inset;
+  position: relative;
+  overflow: hidden;
+  animation: checkinSlideIn 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.checkin-card::after {
+  content: '';
+  position: absolute;
+  top: -50px; left: -50px; right: -50px; height: 150px;
+  background: radial-gradient(ellipse at top, rgba(255,215,0,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+@keyframes checkinSlideIn {
+  from { transform: translateY(40px) scale(0.92); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.checkin-streak-bar-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  margin: 16px 0;
+  overflow: hidden;
+  position: relative;
+}
+.checkin-streak-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700, #ff9a44);
+  width: 0%;
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+.checkin-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin: 20px 0;
+}
+.checkin-day {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.4);
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+}
+.checkin-day.checked {
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,154,68,0.15));
+  border-color: rgba(255,215,0,0.5);
+  color: #FFD700;
+  box-shadow: 0 0 15px rgba(255,215,0,0.2) inset;
+}
+.checkin-day.checked::after {
+  content: '✓';
+  position: absolute;
+  top: -6px; right: -6px;
+  background: #FFD700;
+  color: #000;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  animation: popIn 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  80% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #FFD700;
+  animation: confettiFall 2s ease-out forwards;
+  z-index: 9999;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0); opacity: 1; }
+  100% { transform: translateY(200px) rotate(360deg); opacity: 0; }
+}
+/* ================================== */
+
+</style>
 </head>
 <body>
 <!-- YouTube 影片背景（API 版本） -->
@@ -4474,25 +4684,6 @@ textarea.input-field {
   </div>
 </section>
 
-<!-- 🎁 每日簽到首頁入口卡片 -->
-<section style="margin-bottom: 28px;">
-  <div class="checkin-entry-card" id="checkinEntryCard">
-    <div class="checkin-entry-content">
-      <div class="checkin-entry-title">
-        <span class="checkin-entry-icon">🎁</span>
-        <div>
-          <h3>每日簽到福利</h3>
-          <p>連續簽到即可領取隨機 XP 獎勵，解鎖獨家限量大折抵券！</p>
-        </div>
-      </div>
-      <div class="checkin-entry-status" id="checkinEntryStatus">
-        🔥 連續簽到：<strong>--</strong> 天
-      </div>
-    </div>
-    <button class="btn btn-gold" id="checkinEntryBtn">🎁 立即簽到</button>
-  </div>
-</section>
-
   <!-- 熱門商品 -->
   <section class="featured-products">
     <div class="section-header">
@@ -4822,18 +5013,29 @@ textarea.input-field {
 <!-- 每日簽到模態框 -->
 <div id="checkinModal">
   <div class="checkin-card">
-    <div style="text-align:center; margin-bottom:8px;">
-      <div style="font-size:40px; margin-bottom:8px; filter:drop-shadow(0 0 20px rgba(255,215,0,0.5));">🎁</div>
-      <h3 style="margin:0; font-family:var(--font-display); font-size:1.2rem; background:linear-gradient(135deg,#FFD700,#ff9a44);-webkit-background-clip:text;background-clip:text;color:transparent;">每日簽到打卡</h3>
-      <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-top:4px;">每次進入網站都會提醒你簽到</p>
+    <div style="text-align:center; margin-bottom:12px; position:relative; z-index:2;">
+      <div style="font-size:48px; margin-bottom:12px; filter:drop-shadow(0 0 25px rgba(255,215,0,0.6)); animation: floatCheckin 3s ease-in-out infinite;">🎁</div>
+      <h3 style="margin:0; font-family:var(--font-display); font-size:1.4rem; background:linear-gradient(135deg,#FFF,#FFD700);-webkit-background-clip:text;background-clip:text;color:transparent; font-weight:800; letter-spacing:1px;">星夜專屬福利</h3>
+      <p style="font-size:13px; color:rgba(255,255,255,0.6); margin-top:6px;">連續簽到即可解鎖神秘大獎！</p>
     </div>
-    <div class="checkin-streak" id="checkinStreakDisplay">🔥 連續 0 天</div>
-    <div class="checkin-grid" id="checkinGrid"></div>
-    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:10px; margin-bottom:16px; font-size:12px; color:rgba(255,255,255,0.5); line-height:1.6;">
-      每日：+20 XP &nbsp;|&nbsp; 第3天：+3 代幣 &nbsp;|&nbsp; 第7天：VIP 折扣券
+    
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; z-index:2; position:relative; margin-top:16px;">
+        <div class="checkin-streak" id="checkinStreakDisplay" style="font-size:1.1rem; font-weight:700; color:#ff9a44; text-shadow:0 0 10px rgba(255,154,68,0.3);">🔥 連續 0 天</div>
+        <div style="font-size:12px; color:rgba(255,255,255,0.4);">目標: 7天</div>
     </div>
-    <button id="checkinBtn" class="btn btn-gold" style="width:100%;">✅ 立即簽到</button>
-    <button id="closeCheckinBtn" style="width:100%; margin-top:8px; background:transparent; border:none; color:rgba(255,255,255,0.3); font-size:12px; cursor:pointer; padding:6px;">關閉後今天不再提醒</button>
+    
+    <div class="checkin-streak-bar-container">
+        <div class="checkin-streak-bar" id="checkinStreakBar"></div>
+    </div>
+    
+    <div class="checkin-grid" id="checkinGrid" style="position:relative; z-index:2;"></div>
+    
+    <div style="background:rgba(20,25,45,0.5); border:1px solid rgba(255,215,0,0.15); border-radius:14px; padding:12px; margin-bottom:20px; font-size:12px; color:rgba(255,255,255,0.7); line-height:1.6; text-align:center; position:relative; z-index:2; box-shadow:inset 0 0 15px rgba(0,0,0,0.3);">
+      <span style="color:#FFD700; font-weight:bold;">每日:</span> +20 XP &nbsp;|&nbsp; <span style="color:#FFD700; font-weight:bold;">第3天:</span> +3 代幣 &nbsp;|&nbsp; <span style="color:#FFD700; font-weight:bold;">第7天:</span> VIP 折扣券
+    </div>
+    
+    <button id="checkinBtn" class="btn btn-gold" style="width:100%; padding:14px; font-size:1.1rem; border-radius:14px; position:relative; z-index:2;">✅ 立即簽到</button>
+    <button id="closeCheckinBtn" style="width:100%; margin-top:12px; background:transparent; border:none; color:rgba(255,255,255,0.3); font-size:12px; cursor:pointer; padding:8px; transition:color 0.2s; position:relative; z-index:2;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">稍後再說</button>
   </div>
 </div>
 
@@ -5195,49 +5397,8 @@ function captureUIStateToAccount() {
   state.lastFreeTokenClaim = lastFreeTokenClaim;
 }
 
-async function loadCloudState() {
-  if (isLoadingCloudState) return;
-  isLoadingCloudState = true;
-  try {
-    const cached = safeGetItem(CLOUD_STATE_CACHE_KEY);
-    if (cached) {
-      cloudState = JSON.parse(cached);
-    }
-    const res = await fetch(`${JSONBIN_URL}?nocache=${Date.now()}`, { headers: { 'X-Master-Key': JSONBIN_API_KEY } });
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.record?.accounts) cloudState = data.record;
-    }
-  } catch (e) {
-    console.warn('載入雲端狀態失敗', e);
-  }
-  safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
-  isLoadingCloudState = false;
-  applyAccountStateToUI();
-}
 
-let cloudSaveTimer = null;
-function scheduleSaveCloudState() {
-  if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
-  cloudSaveTimer = setTimeout(() => saveCloudState(), 600);
-}
 
-async function saveCloudState() {
-  if (isSavingCloudState) return;
-  isSavingCloudState = true;
-  try {
-    captureUIStateToAccount();
-    safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
-    await fetch(JSONBIN_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-      body: JSON.stringify(cloudState)
-    });
-  } catch (e) {
-    console.warn('儲存雲端狀態失敗', e);
-  }
-  isSavingCloudState = false;
-}
 
 // ========== 🔒 密碼雜湊 (SHA-256 via Web Crypto API) ==========
 // 密碼在存入 localStorage 前會先經過 SHA-256 單向雜湊，
@@ -8459,7 +8620,7 @@ function saveNotifications() {
   const state = getActiveAccountState();
   state.notifications = notifications.slice(0, 50);
   safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
-  scheduleSaveCloudState();
+  saveToJSONBin();
 }
 function addNotification(type, msg) {
   loadNotifications();
@@ -8708,7 +8869,7 @@ function saveReviews() {
   const state = getActiveAccountState();
   state.reviews = reviews;
   safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
-  scheduleSaveCloudState();
+  saveToJSONBin();
 }
 function getReviewsForProduct(pid) { loadReviews(); return reviews[String(pid)] || []; }
 function renderReviews(pid) {
@@ -8802,12 +8963,6 @@ let checkinData = { lastDate: '', streak: 0, history: [] };
 function loadCheckin() {
   const state = getActiveAccountState();
   checkinData = state.checkin || { lastDate: '', streak: 0, history: [] };
-}
-function saveCheckin() {
-  const state = getActiveAccountState();
-  state.checkin = checkinData;
-  safeSetItem(CLOUD_STATE_CACHE_KEY, JSON.stringify(cloudState));
-  scheduleSaveCloudState();
 }
 function getTodayStr() { return new Date().toISOString().slice(0,10); }
 function renderCheckinGrid() {
@@ -8930,6 +9085,7 @@ function initAllNewFeatures() {
   document.getElementById('checkinBtn')?.addEventListener('click', doCheckin);
   document.getElementById('closeCheckinBtn')?.addEventListener('click', closeCheckinModal);
   // 簽到按鈕檢查狀態
+  document.getElementById('checkinEntryBtn')?.addEventListener('click', openCheckinModal);
   loadCheckin();
   const today = getTodayStr();
   const cBtn = document.getElementById('checkinBtn');
