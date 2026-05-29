@@ -4391,6 +4391,177 @@ textarea.input-field {
   to { transform: translateY(0); opacity: 1; }
 }
 
+
+/* ===== 新增：搜尋列、訂單系統與物流 CSS ===== */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+.search-input-wrapper {
+  position: relative;
+}
+#globalSearchInput {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 6px 12px 6px 36px;
+  color: #fff;
+  width: 160px;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+#globalSearchInput:focus {
+  width: 220px;
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  width: 300px;
+  background: rgba(15, 20, 35, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 2000;
+  display: none;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.search-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.2s;
+}
+.search-item:hover {
+  background: rgba(255, 215, 0, 0.1);
+}
+.search-item-img {
+  width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
+}
+.search-item-info {
+  flex: 1;
+}
+.search-item-title {
+  font-size: 0.95rem; font-weight: 600; color: #fff;
+}
+.search-item-price {
+  font-size: 0.85rem; color: var(--gold);
+}
+
+@media (max-width: 768px) {
+  .search-container {
+    margin-right: 8px;
+  }
+  #globalSearchInput {
+    width: 36px;
+    padding: 6px;
+    color: transparent;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+  }
+  .search-icon { left: 10px; color: #fff; }
+  #globalSearchInput:focus {
+    width: 200px;
+    padding: 6px 12px 6px 36px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--gold);
+    position: absolute;
+    right: 0;
+  }
+  #globalSearchInput:focus + .search-icon {
+    left: auto; right: 180px; /* 粗略定位 */
+  }
+}
+
+.logistics-options {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.logistics-btn {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.logistics-btn.active {
+  background: rgba(255,215,0,0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+#cvsMapBtn {
+  display: none;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+#cvsMapBtn:hover { opacity: 0.9; }
+
+.user-order-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.user-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+.buy-again-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.buy-again-btn:hover {
+  background: var(--gold);
+  color: #000;
+}
+/* ===== 新增結束 ===== */
+
 </style>
 </head>
 <body>
@@ -4448,6 +4619,16 @@ textarea.input-field {
   <div class="cart-icon" id="cartToggleBtn">
     🛒
     <span class="cart-count" id="cartCount">0</span>
+  </div>
+
+  
+  <!-- 搜尋列 -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <input type="text" id="globalSearchInput" placeholder="搜尋商品...">
+      <span class="search-icon">🔍</span>
+    </div>
+    <div id="searchDropdown" class="search-dropdown"></div>
   </div>
 
   <div style="position:relative;display:flex;align-items:center;" id="notifBellWrapper">
@@ -4569,27 +4750,12 @@ textarea.input-field {
             <button class="btn btn-danger btn-sm" id="clearAllOrdersBtn" style="padding: 6px 12px; font-size: 12px; margin: 0;">🗑️ 清空所有訂單</button>
           </div>
           
-          <div class="orders-table-wrapper" style="overflow-x: auto; background: rgba(0,0,0,0.15); border: 1px solid var(--line); border-radius: 18px;">
-            <table class="products-table" style="min-width: 900px; border-collapse: collapse; width: 100%;">
-              <thead>
-                <tr>
-                  <th style="padding: 14px; text-align: left;">訂單編號 / 時間</th>
-                  <th style="padding: 14px; text-align: left;">買家 Email</th>
-                  <th style="padding: 14px; text-align: left;">遊戲 ID / Discord</th>
-                  <th style="padding: 14px; text-align: left;">購買品項</th>
-                  <th style="padding: 14px; text-align: left;">總金額</th>
-                  <th style="padding: 14px; text-align: left;">付款方式</th>
-                  <th style="padding: 14px; text-align: left;">狀態</th>
-                  <th style="padding: 14px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="adminOrdersTableBody">
-                <!-- 動態插入訂單 -->
-              </tbody>
-            </table>
-            <div id="emptyAdminOrders" style="text-align: center; padding: 40px;" class="hidden">
-              <p style="color: var(--muted-2); font-size: 14px;">📭 尚無任何玩家提交訂單</p>
-            </div>
+          <div class="admin-orders-grid" id="adminOrdersGrid" style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));">
+            <!-- 動態注入訂單 -->
+          </div>
+          <div id="emptyAdminOrders" style="text-align: center; padding: 40px;" class="hidden">
+            <p style="color: var(--muted-2); font-size: 14px;">📭 尚無任何玩家訂單</p>
+          </div>
           </div>
         </div>
         
@@ -8114,79 +8280,87 @@ window.applyPromoCode = applyPromoCode;
 
 // ========== 管理員後台訂單管理 ==========
 function renderAdminOrders() {
-  const body = document.getElementById('adminOrdersTableBody');
+  const grid = document.getElementById('adminOrdersGrid');
   const empty = document.getElementById('emptyAdminOrders');
-  if (!body) return;
+  // 如果沒有找到 grid (例如尚未登入或不在該畫面)，不強制報錯
+  if (!grid && document.getElementById('adminOrdersTableBody')) {
+     // 兼容舊版 ID，避免報錯
+     const oldBody = document.getElementById('adminOrdersTableBody');
+     if(oldBody) oldBody.id = 'adminOrdersGrid';
+  }
+  
+  const targetContainer = document.getElementById('adminOrdersGrid');
+  if (!targetContainer) return;
   
   if (allOrders.length === 0) {
-    body.innerHTML = '';
+    targetContainer.innerHTML = '';
     empty?.classList.remove('hidden');
     return;
   }
   empty?.classList.add('hidden');
   
-  body.innerHTML = allOrders.map(order => {
+  targetContainer.innerHTML = allOrders.map(order => {
     const d = new Date(order.date);
     const dStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    
     const itemsListHtml = order.items.map(item => `
-      <div style="font-size: 13px; margin-bottom: 2px;">
-        • ${item.name} x ${item.quantity} (NT$${item.price.toLocaleString()})
+      <div style="font-size: 13px; margin-bottom: 4px; display:flex; justify-content:space-between; align-items:center;">
+        <span>🔹 ${item.name}</span>
+        <span style="color:var(--gold); font-weight:600;">x ${item.quantity}</span>
       </div>
     `).join('');
     
-    const statusColor = order.status === '已完成' ? '#2dff9d' : order.status === '處理中' ? '#ffaa00' : '#ff3b5c';
-    const statusBg = order.status === '已完成' ? 'rgba(45,255,157,0.1)' : order.status === '處理中' ? 'rgba(255,170,0,0.1)' : 'rgba(255,59,92,0.1)';
-    const statusBorder = order.status === '已完成' ? 'rgba(45,255,157,0.25)' : order.status === '處理中' ? 'rgba(255,170,0,0.25)' : 'rgba(255,59,92,0.25)';
+    const statusColor = order.status === '已出貨' ? '#2dff9d' : order.status === '處理中' ? '#ffaa00' : '#ff3b5c';
+    const statusBg = order.status === '已出貨' ? 'rgba(45,255,157,0.1)' : order.status === '處理中' ? 'rgba(255,170,0,0.1)' : 'rgba(255,59,92,0.1)';
+    const statusBorder = order.status === '已出貨' ? 'rgba(45,255,157,0.3)' : order.status === '處理中' ? 'rgba(255,170,0,0.3)' : 'rgba(255,59,92,0.3)';
     
+    const paymentStr = order.paymentMethod === 'credit_card' ? '💳 信用卡' : order.paymentMethod === 'linepay' ? '📱 LINE Pay' : order.paymentMethod === 'bank_transfer' ? '🏦 銀行轉帳' : order.paymentMethod === 'mycard' ? '點數 MyCard' : '未知';
+
     return `
-      <tr style="border-bottom: 1px solid var(--line); transition: background var(--transition-fast);">
-        <td data-label="訂單編號 / 時間" style="padding: 14px; text-align: left;">
-          <div class="td-content">
-            <div style="font-weight: 700; color: var(--gold);">${order.id}</div>
-            <div style="font-size: 11px; color: var(--muted-2); margin-top: 4px;">🕐 ${dStr}</div>
+      <div class="admin-order-card" style="background: linear-gradient(145deg, rgba(20,25,45,0.8), rgba(10,12,25,0.9)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s, box-shadow 0.2s;">
+        
+        <!-- Header: ID & Status -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+          <div>
+            <div style="font-weight: 800; font-family: var(--font-display); color: var(--gold); font-size: 1.1rem;">${order.id}</div>
+            <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">📅 ${dStr}</div>
           </div>
-        </td>
-        <td data-label="買家 Email" style="padding: 14px; text-align: left; font-size: 13px;">
-          <div class="td-content">${order.buyerEmail || '未知買家'}</div>
-        </td>
-        <td data-label="遊戲 ID / Discord" style="padding: 14px; text-align: left; font-size: 13px;">
-          <div class="td-content">
-            <div>🎮 ID: <span style="font-weight: 600; color: #fff;">${order.playerId || '無'}</span></div>
-            <div style="margin-top: 4px; color: var(--muted);">💬 DC: <span style="font-weight: 600; color: #fff;">${order.discordId || '無'}</span></div>
+          <span style="background:${statusBg}; border:1px solid ${statusBorder}; color:${statusColor}; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; box-shadow: 0 0 10px ${statusBg};">${order.status || '處理中'}</span>
+        </div>
+        
+        <!-- Buyer Info -->
+        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 13px; color: #ddd; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+          <div>📧 <strong>Email:</strong> ${order.buyerEmail || '未知'}</div>
+          ${order.playerId ? `<div>🎮 <strong>遊戲ID:</strong> <span style="color:#fff; font-weight:600;">${order.playerId}</span></div>` : ''}
+          ${order.discordId ? `<div>💬 <strong>DC:</strong> <span style="color:#fff; font-weight:600;">${order.discordId}</span></div>` : ''}
+          <div>💵 <strong>付款:</strong> ${paymentStr}</div>
+        </div>
+
+        <!-- Items List -->
+        <div style="flex: 1; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
+          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">購買清單</div>
+          ${itemsListHtml}
+        </div>
+
+        <!-- Total -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);">
+          <span style="font-size: 14px; color: var(--muted);">總金額</span>
+          <div style="text-align: right;">
+            <div style="font-size: 1.2rem; font-weight: 800; color: var(--blue);">NT$${order.total.toLocaleString()}</div>
+            ${order.promoCode ? `<div style="font-size:11px; color:var(--success);">🎟️ ${order.promoCode} (-NT$${(order.discountAmount || 0).toLocaleString()})</div>` : ''}
           </div>
-        </td>
-        <td data-label="購買品項" style="padding: 14px; text-align: left;">
-          <div class="td-content">${itemsListHtml}</div>
-        </td>
-        <td data-label="總金額" style="padding: 14px; text-align: left; font-weight: 700; color: var(--blue);">
-          <div class="td-content">
-            NT$${order.total.toLocaleString()}
-            ${order.promoCode ? `<div style="font-size:10px; color:var(--success); margin-top:2px;">🎟️ ${order.promoCode} (-NT$${order.discountAmount.toLocaleString()})</div>` : ''}
-          </div>
-        </td>
-        <td data-label="付款方式" style="padding: 14px; text-align: left; font-size: 13px;">
-          <div class="td-content">
-            ${order.paymentMethod === 'credit_card' ? '💳 信用卡' : order.paymentMethod === 'linepay' ? '🟢 LINE Pay' : order.paymentMethod === 'bank_transfer' ? '🏦 銀行轉帳' : order.paymentMethod === 'mycard' ? '🎁 MyCard 點數' : '其他'}
-          </div>
-        </td>
-        <td data-label="狀態" style="padding: 14px; text-align: left;">
-          <div class="td-content">
-            <span style="background:${statusBg}; border:1px solid ${statusBorder}; color:${statusColor}; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 40px;">${order.status}</span>
-          </div>
-        </td>
-        <td data-label="操作" style="padding: 14px; text-align: center;">
-          <div class="td-content">
-            <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
-              ${order.status !== '已完成' ? `
-                <button class="action-btn" onclick="updateOrderStatus('${order.id}', '已完成')" style="padding: 5px 8px; font-size: 11px; color: #2dff9d; border-color: rgba(45,255,157,0.3); background: rgba(45,255,157,0.05); margin: 0; border-radius: 8px;">✅ 完成發放</button>
-              ` : `
-                <button class="action-btn" onclick="updateOrderStatus('${order.id}', '處理中')" style="padding: 5px 8px; font-size: 11px; color: #ffaa00; border-color: rgba(255,170,0,0.3); background: rgba(255,170,0,0.05); margin: 0; border-radius: 8px;">🔄 設為處理中</button>
-              `}
-              <button class="action-btn delete" onclick="deleteAdminOrder('${order.id}')" style="padding: 5px 8px; font-size: 11px; margin: 0; border-radius: 8px;">🗑️ 刪除</button>
-            </div>
-          </div>
-        </td>
-      </tr>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 8px; margin-top: 16px;">
+          ${order.status !== '已出貨' ? `
+            <button onclick="updateOrderStatus('${order.id}', '已出貨')" style="flex: 1; padding: 10px; font-size: 13px; font-weight: 700; color: #000; background: #2dff9d; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.2s;">📦 標記出貨</button>
+          ` : `
+            <button onclick="updateOrderStatus('${order.id}', '處理中')" style="flex: 1; padding: 10px; font-size: 13px; font-weight: 700; color: #000; background: #ffaa00; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.2s;">⏳ 改回處理中</button>
+          `}
+          <button onclick="deleteAdminOrder('${order.id}')" style="padding: 10px 14px; font-size: 13px; color: #ff3b5c; background: rgba(255,59,92,0.1); border: 1px solid rgba(255,59,92,0.3); border-radius: 8px; cursor: pointer; transition: all 0.2s;">🗑️ 刪除</button>
+        </div>
+      </div>
     `;
   }).join('');
 }
