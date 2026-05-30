@@ -10095,49 +10095,25 @@ function fetchZuiShengServerStatus() {
       pingText.innerText = "--- ms";
   };
 
-  // 1. 先嘗試透過 CFX 官方 API 抓取
-  fetch("https://servers-frontend.fivem.net/api/servers/single/xmmk9e")
+  // 為了達成 1 秒更新且擁有最真實極低的延遲，我們移除所有代理伺服器，直接對點連線！
+  // 加上時間戳記防止快取卡頓
+  const directUrl = "http://gg12nemo11.asuscomm.com:30120/dynamic.json?t=" + Date.now();
+  
+  fetch(directUrl, { cache: "no-store" })
     .then(res => {
-      if(!res.ok) throw new Error("CFX API 404");
+      if(!res.ok) throw new Error("Fetch Failed");
       return res.json();
     })
     .then(data => {
-      setOnline(data.Data?.clients || 0, data.Data?.sv_maxclients || 256);
+      setOnline(data.clients || 0, data.sv_maxclients || 256);
     })
-    .catch(() => {
-      // 2. 退回直接戳 IP
-      fetch("http://gg12nemo11.asuscomm.com:30120/dynamic.json", { cache: "no-store" })
-        .then(res => {
-          if(!res.ok) throw new Error("Direct IP Failed");
-          return res.json();
-        })
-        .then(data => {
-          setOnline(data.clients || 0, data.sv_maxclients || 256);
-        })
-        .catch(() => {
-          // 3. (終極殺手鐧) 如果瀏覽器阻擋直連 (CORS / Mixed Content)，則透過 AllOrigins HTTPS Proxy 代理抓取
-          const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent("http://gg12nemo11.asuscomm.com:30120/dynamic.json");
-          fetch(proxyUrl, { cache: "no-store" })
-            .then(res => {
-              if(!res.ok) throw new Error("Proxy Failed");
-              return res.json();
-            })
-            .then(data => {
-              if (data.contents) {
-                const serverData = JSON.parse(data.contents);
-                setOnline(serverData.clients || 0, serverData.sv_maxclients || 256);
-              } else {
-                throw new Error("Proxy Empty");
-              }
-            })
-            .catch((err) => {
-              console.log("All methods failed.", err);
-              setOffline();
-            });
-        });
+    .catch((err) => {
+      // 避免每秒鐘洗 console
+      // console.log("Fetch failed", err);
+      setOffline();
     });
     
-  setTimeout(fetchZuiShengServerStatus, 15000);
+  setTimeout(fetchZuiShengServerStatus, 1000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
