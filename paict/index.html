@@ -5125,8 +5125,8 @@ textarea.input-field {
         <div class="stat-item">
           <span class="stat-icon">🚀</span>
           <div style="display:flex; flex-direction:column; align-items:flex-start;">
-            <span class="stat-value">10K+</span>
-            <span class="stat-label">活躍玩家</span>
+            <span class="stat-value" id="siteVisitsCounter">10K+</span>
+            <span class="stat-label">總瀏覽人次</span>
           </div>
         </div>
         <div class="stat-divider"></div>
@@ -10074,10 +10074,11 @@ function fetchZuiShengServerStatus() {
   
   if (!statusDot) return;
 
-  let currentClients = 0;
-  let maxClients = 256;
+  let currentClients = "...";
+  let maxClients = "...";
   let basePing = 20;
-  let isOnline = false;
+  let isOnline = true; 
+  let failCount = 0;
   let lastFetchTime = 0;
 
   const updateUI = () => {
@@ -10100,46 +10101,60 @@ function fetchZuiShengServerStatus() {
     }
   };
 
+  const processData = (serverData) => {
+    isOnline = true;
+    failCount = 0;
+    currentClients = serverData.clients || 0;
+    maxClients = serverData.sv_maxclients || 256;
+    basePing = Math.floor(Math.random() * 15) + 12; // 台灣本地真實延遲模擬
+    updateUI();
+  };
+
   const doNetworkFetch = () => {
-    const startTime = Date.now();
     const targetUrl = "http://gg12nemo11.asuscomm.com:30120/dynamic.json?t=" + Date.now();
-    // 必須使用 /get 端點才能獲得 CORS Header
-    const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
     
-    fetch(proxyUrl, { cache: "no-store" })
+    // 主力節點: AllOrigins
+    const proxy1 = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
+    // 備援節點: CodeTabs
+    const proxy2 = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(targetUrl);
+    
+    fetch(proxy1, { cache: "no-store" })
       .then(res => {
-        if(!res.ok) throw new Error("Fetch Failed");
+        if(!res.ok) throw new Error("P1 Fail");
         return res.json();
       })
       .then(data => {
-        if (data.contents) {
-          const serverData = JSON.parse(data.contents);
-          isOnline = true;
-          currentClients = serverData.clients || 0;
-          maxClients = serverData.sv_maxclients || 256;
-          
-          let ping = Date.now() - startTime;
-          basePing = Math.max(15, ping - 200); 
-          updateUI();
-        } else {
-            throw new Error("Empty Contents");
-        }
+        if (!data.contents) throw new Error("P1 Empty");
+        processData(JSON.parse(data.contents));
       })
-      .catch((err) => {
-        console.log("Status Fetch Error:", err);
-        isOnline = false;
-        updateUI();
+      .catch(() => {
+        // 主力節點閃退，0秒內無縫啟用備援節點
+        fetch(proxy2, { cache: "no-store" })
+          .then(res => {
+            if(!res.ok) throw new Error("P2 Fail");
+            return res.json();
+          })
+          .then(data => {
+            processData(data);
+          })
+          .catch((err) => {
+            failCount++;
+            if (failCount >= 2) {
+              isOnline = false;
+            }
+            updateUI();
+          });
       });
   };
 
   setInterval(updateUI, 1000);
   
   setInterval(() => {
-    if (Date.now() - lastFetchTime > 10000) {
+    if (Date.now() - lastFetchTime > 4000) {
       lastFetchTime = Date.now();
       doNetworkFetch();
     }
-  }, 15000);
+  }, 5000);
   
   lastFetchTime = Date.now();
   doNetworkFetch();
@@ -10147,6 +10162,24 @@ function fetchZuiShengServerStatus() {
 
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(fetchZuiShengServerStatus, 2000); // 延遲 2 秒啟動，製造「連線中...」的視覺效果
+});
+
+
+// 網站瀏覽人次計數器
+document.addEventListener('DOMContentLoaded', () => {
+    fetch("https://api.counterapi.dev/v1/starrynightmall_main/visits/up")
+      .then(res => res.json())
+      .then(data => {
+        if(data && data.count) {
+          const counterEl = document.getElementById('siteVisitsCounter');
+          if (counterEl) {
+             counterEl.innerText = data.count.toLocaleString();
+          }
+        }
+      })
+      .catch(err => {
+        console.log("Counter API failed", err);
+      });
 });
 
 </script>
