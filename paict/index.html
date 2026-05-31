@@ -4562,6 +4562,146 @@ textarea.input-field {
 }
 /* ===== 新增結束 ===== */
 
+
+/* Discord & Chat Widget Styles */
+.discord-btn {
+  background: #5865F2 !important;
+  color: white !important;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.discord-btn:hover {
+  background: #4752C4 !important;
+  box-shadow: 0 0 15px rgba(88,101,242,0.5) !important;
+}
+
+.chat-widget-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #000;
+  box-shadow: 0 5px 20px rgba(0, 194, 255, 0.4);
+  cursor: pointer;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
+.chat-widget-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 25px rgba(0, 194, 255, 0.6);
+}
+.chat-widget-window {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 350px;
+  height: 480px;
+  background: rgba(10, 14, 29, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 194, 255, 0.3);
+  border-radius: 20px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: bottom right;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.chat-widget-window.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.chat-header {
+  background: linear-gradient(90deg, rgba(0,194,255,0.2) 0%, transparent 100%);
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-header h3 { margin: 0; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 8px;}
+.chat-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.5rem; line-height: 1;}
+.chat-close:hover { color: #fff; }
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.chat-msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+.chat-msg.bot {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.chat-msg.user {
+  background: var(--primary);
+  color: #000;
+  font-weight: 500;
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+}
+.chat-input-area {
+  padding: 15px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  gap: 10px;
+  background: rgba(0,0,0,0.3);
+}
+.chat-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 10px 15px;
+  color: #fff;
+  outline: none;
+  font-family: inherit;
+}
+.chat-input:focus { border-color: var(--primary); }
+.chat-send-btn {
+  background: var(--primary);
+  color: #000;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+.chat-send-btn:hover { transform: scale(1.1); }
+
 </style>
 
 <style id="ultraPremiumUserOrders">
@@ -4651,6 +4791,146 @@ textarea.input-field {
   border: 1px solid rgba(0, 194, 255, 0.3) !important;
   box-shadow: 0 0 80px rgba(0, 194, 255, 0.15), inset 0 0 40px rgba(0, 194, 255, 0.05) !important;
 }
+
+/* Discord & Chat Widget Styles */
+.discord-btn {
+  background: #5865F2 !important;
+  color: white !important;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.discord-btn:hover {
+  background: #4752C4 !important;
+  box-shadow: 0 0 15px rgba(88,101,242,0.5) !important;
+}
+
+.chat-widget-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #000;
+  box-shadow: 0 5px 20px rgba(0, 194, 255, 0.4);
+  cursor: pointer;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
+.chat-widget-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 25px rgba(0, 194, 255, 0.6);
+}
+.chat-widget-window {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 350px;
+  height: 480px;
+  background: rgba(10, 14, 29, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 194, 255, 0.3);
+  border-radius: 20px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: bottom right;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.chat-widget-window.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.chat-header {
+  background: linear-gradient(90deg, rgba(0,194,255,0.2) 0%, transparent 100%);
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-header h3 { margin: 0; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 8px;}
+.chat-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.5rem; line-height: 1;}
+.chat-close:hover { color: #fff; }
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.chat-msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+.chat-msg.bot {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.chat-msg.user {
+  background: var(--primary);
+  color: #000;
+  font-weight: 500;
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+}
+.chat-input-area {
+  padding: 15px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  gap: 10px;
+  background: rgba(0,0,0,0.3);
+}
+.chat-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 10px 15px;
+  color: #fff;
+  outline: none;
+  font-family: inherit;
+}
+.chat-input:focus { border-color: var(--primary); }
+.chat-send-btn {
+  background: var(--primary);
+  color: #000;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+.chat-send-btn:hover { transform: scale(1.1); }
+
 </style>
 
 
@@ -4859,6 +5139,146 @@ textarea.input-field {
   color: #000; font-weight: 800; text-align: center; font-size: 1rem; transition: bottom 0.3s;
 }
 .carousel-card:hover .carousel-btn { bottom: 0; }
+
+/* Discord & Chat Widget Styles */
+.discord-btn {
+  background: #5865F2 !important;
+  color: white !important;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.discord-btn:hover {
+  background: #4752C4 !important;
+  box-shadow: 0 0 15px rgba(88,101,242,0.5) !important;
+}
+
+.chat-widget-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #000;
+  box-shadow: 0 5px 20px rgba(0, 194, 255, 0.4);
+  cursor: pointer;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
+.chat-widget-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 25px rgba(0, 194, 255, 0.6);
+}
+.chat-widget-window {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 350px;
+  height: 480px;
+  background: rgba(10, 14, 29, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 194, 255, 0.3);
+  border-radius: 20px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: bottom right;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.chat-widget-window.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.chat-header {
+  background: linear-gradient(90deg, rgba(0,194,255,0.2) 0%, transparent 100%);
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-header h3 { margin: 0; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 8px;}
+.chat-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.5rem; line-height: 1;}
+.chat-close:hover { color: #fff; }
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.chat-msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+.chat-msg.bot {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.chat-msg.user {
+  background: var(--primary);
+  color: #000;
+  font-weight: 500;
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+}
+.chat-input-area {
+  padding: 15px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  gap: 10px;
+  background: rgba(0,0,0,0.3);
+}
+.chat-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 10px 15px;
+  color: #fff;
+  outline: none;
+  font-family: inherit;
+}
+.chat-input:focus { border-color: var(--primary); }
+.chat-send-btn {
+  background: var(--primary);
+  color: #000;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+.chat-send-btn:hover { transform: scale(1.1); }
+
 </style>
 
 </head>
@@ -5125,7 +5545,7 @@ textarea.input-field {
         <div class="stat-item">
           <span class="stat-icon">🚀</span>
           <div style="display:flex; flex-direction:column; align-items:flex-start;">
-            <span class="stat-value" id="siteVisitsCounter">10K+</span>
+            <span class="stat-value" id="siteVisitsCounter"></span>
             <span class="stat-label">總瀏覽人次</span>
           </div>
         </div>
@@ -5318,6 +5738,32 @@ textarea.input-field {
           <h2>💎 VIP 尊榮特權與抽獎中心</h2>
           <p>購買專屬特權或超跑，並參與幸運轉盤與盲盒抽獎活動！</p>
         </div>
+        
+        <div class="vip-privileges-section" style="margin: 24px 0;">
+          <h3 style="margin-bottom: 16px; font-weight: 700; color: #fff; font-size: 1.2rem;">✨ VIP 專屬特權一覽</h3>
+          <div class="privileges-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div class="privilege-card" style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 20px 16px; text-align: center; transition: all 0.3s ease;">
+              <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));">🚀</div>
+              <h4 style="color: var(--gold); margin-bottom: 8px; font-size: 1.1rem;">免排隊特權</h4>
+              <p style="font-size: 0.85rem; color: var(--muted-2); line-height: 1.5;">伺服器客滿時，獨享「綠色通道」優先連線登入遊戲。</p>
+            </div>
+            <div class="privilege-card" style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 20px 16px; text-align: center; transition: all 0.3s ease;">
+              <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));">🏷️</div>
+              <h4 style="color: var(--gold); margin-bottom: 8px; font-size: 1.1rem;">全館 9 折起</h4>
+              <p style="font-size: 0.85rem; color: var(--muted-2); line-height: 1.5;">商城購買任意道具、車輛、武器，結帳時自動享有折扣優惠。</p>
+            </div>
+            <div class="privilege-card" style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 20px 16px; text-align: center; transition: all 0.3s ease;">
+              <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));">🎁</div>
+              <h4 style="color: var(--gold); margin-bottom: 8px; font-size: 1.1rem;">每日登入好禮</h4>
+              <p style="font-size: 0.85rem; color: var(--muted-2); line-height: 1.5;">每日除了原本簽到，額外派發「1 枚幸運代幣」與專屬遊戲幣。</p>
+            </div>
+            <div class="privilege-card" style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 20px 16px; text-align: center; transition: all 0.3s ease;">
+              <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));">🏎️</div>
+              <h4 style="color: var(--gold); margin-bottom: 8px; font-size: 1.1rem;">專屬特權商品</h4>
+              <p style="font-size: 0.85rem; color: var(--muted-2); line-height: 1.5;">解鎖「VIP 專區」商品購買資格，包含絕版限量超跑與炫光道具。</p>
+            </div>
+          </div>
+        </div>
 
         <!-- VIP Profile Card (車手 VIP 特權與到期進度) -->
         <div class="vip-profile-card" id="vipProfileCard" style="display: none;">
@@ -5331,6 +5777,9 @@ textarea.input-field {
                 <span id="vipProfileBadge" class="vip-badge-normal">👤 普通市民</span>
               </div>
               <div class="vip-profile-status" id="vipProfileStatus">未開通 VIP 特權</div>
+              <div style="margin-top: 12px;" id="vipSubscribeBtnContainer">
+                <button class="btn btn-gold" id="btnSubscribeVip" style="padding: 6px 16px; border-radius: 20px; font-size: 0.85rem;">💎 開通 VIP (NT$ 500 / 30天)</button>
+              </div>
             </div>
           </div>
           
@@ -5800,6 +6249,10 @@ textarea.input-field {
         <div class="google-btn-container" style="display: flex; justify-content: center;">
           <div id="googleSignInButton"></div>
         </div>
+        <button class="auth-btn discord-btn" onclick="handleDiscordLogin(event)" style="margin-top: 15px; width: 100%; border-radius: 20px; font-weight: bold; font-size: 0.95rem;">
+          <svg width="20" height="20" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.08 0 72.37 72.37 0 0 0-3.36-6.83 105.15 105.15 0 0 0-26.23 8.07C2.04 33.84-2.43 59 1.13 83.74a105.5 105.5 0 0 0 32.1 12.62 77.7 77.7 0 0 0 6.89-11.23 68.42 68.42 0 0 1-10.85-5.18c.91-.68 1.8-1.39 2.67-2.12a75.54 75.54 0 0 0 64.32 0c.87.71 1.76 1.42 2.66 2.11a68.3 68.3 0 0 1-10.85 5.18 77.7 77.7 0 0 0 6.89 11.23 105.5 105.5 0 0 0 32.1-12.62c3.96-29.35-6.55-52.61-29.36-75.67zM42.68 65.69c-6.19 0-11.23-5.63-11.23-12.54s4.97-12.54 11.23-12.54 11.3 5.63 11.23 12.54c0 6.91-4.97 12.54-11.23 12.54zm41.78 0c-6.19 0-11.23-5.63-11.23-12.54s4.97-12.54 11.23-12.54 11.3 5.63 11.23 12.54c0 6.91-5.04 12.54-11.23 12.54z"/></svg>
+          使用 Discord 登入
+        </button>
         
         <div class="auth-footer-text">
           還沒有帳號？ <span class="toggle-link" id="switchToRegister">立即註冊</span>
@@ -5845,6 +6298,10 @@ textarea.input-field {
         <div class="google-btn-container" style="display: flex; justify-content: center;">
           <div id="googleSignUpButton"></div>
         </div>
+        <button class="auth-btn discord-btn" onclick="handleDiscordLogin(event)" style="margin-top: 15px; width: 100%; border-radius: 20px; font-weight: bold; font-size: 0.95rem;">
+          <svg width="20" height="20" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.08 0 72.37 72.37 0 0 0-3.36-6.83 105.15 105.15 0 0 0-26.23 8.07C2.04 33.84-2.43 59 1.13 83.74a105.5 105.5 0 0 0 32.1 12.62 77.7 77.7 0 0 0 6.89-11.23 68.42 68.42 0 0 1-10.85-5.18c.91-.68 1.8-1.39 2.67-2.12a75.54 75.54 0 0 0 64.32 0c.87.71 1.76 1.42 2.66 2.11a68.3 68.3 0 0 1-10.85 5.18 77.7 77.7 0 0 0 6.89 11.23 105.5 105.5 0 0 0 32.1-12.62c3.96-29.35-6.55-52.61-29.36-75.67zM42.68 65.69c-6.19 0-11.23-5.63-11.23-12.54s4.97-12.54 11.23-12.54 11.3 5.63 11.23 12.54c0 6.91-4.97 12.54-11.23 12.54zm41.78 0c-6.19 0-11.23-5.63-11.23-12.54s4.97-12.54 11.23-12.54 11.3 5.63 11.23 12.54c0 6.91-5.04 12.54-11.23 12.54z"/></svg>
+          使用 Discord 登入
+        </button>
         
         <div class="auth-footer-text">
           已有帳號？ <span class="toggle-link" id="switchToLogin">立即登入</span>
@@ -7315,8 +7772,16 @@ function performGoogleLinking() {
         if(inputCode !== pendingRegistration.code){ registerError.textContent='驗證碼錯誤'; registerError.classList.add('show'); return false; }
         // 🔒 儲存前先雜湊密碼，避免明文存入 localStorage
         const hashedPwd = await hashPassword(pendingRegistration.password);
-        saveUser({ name:pendingRegistration.name, email:pendingRegistration.email, password:hashedPwd, vipExpiry: 0 });
-        const loggedUser = { email:pendingRegistration.email, name:pendingRegistration.name, picture:`https://ui-avatars.com/api/?name=${encodeURIComponent(pendingRegistration.name)}&background=00c2ff&color=fff`, loginMethod:'email', vipExpiry: 0 };
+        
+        const usedRefCode = document.getElementById('registerReferral')?.value.trim() || '';
+        const myGeneratedCode = "REF-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+        saveUser({ name:pendingRegistration.name, email:pendingRegistration.email, password:hashedPwd, vipExpiry: 0, myCode: myGeneratedCode, usedReferral: usedRefCode });
+        const loggedUser = { email:pendingRegistration.email, name:pendingRegistration.name, picture:`https://ui-avatars.com/api/?name=${encodeURIComponent(pendingRegistration.name)}&background=00c2ff&color=fff`, loginMethod:'email', vipExpiry: 0, myCode: myGeneratedCode };
+        if (usedRefCode) {
+            setTimeout(() => addNotification('prize', `🎁 成功使用邀請碼 ${usedRefCode}，獲得 1 枚 VIP 抽獎代幣！`), 2000);
+            let t = parseInt(safeGetItem('vipTokens') || '0'); t += 1; safeSetItem('vipTokens', String(t)); updateTokenDisplay();
+        }
+        
         currentUser = loggedUser;
         safeSetItem('raceUIUser', JSON.stringify(loggedUser));
         updateUIForLogin(loggedUser);
@@ -8765,7 +9230,7 @@ function updateUIForLogin(user) {
       welcomeBanner.style.display = 'block';
       if (displayUserName) displayUserName.textContent = user.name;
       if (loginMethodBadge) {
-        loginMethodBadge.textContent = user.loginMethod === 'google' ? '(Google)' : '(Email)';
+        loginMethodBadge.textContent = user.loginMethod === 'google' ? '(Google)' : (user.loginMethod === 'discord' ? '(Discord)' : '(Email)');
       }
     }
     
@@ -10183,5 +10648,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+
+  <!-- 浮動客服元件 -->
+  <div class="chat-widget-btn" id="chatWidgetBtn" onclick="toggleChatWindow()">
+    💬
+  </div>
+  <div class="chat-widget-window" id="chatWidgetWindow">
+    <div class="chat-header">
+      <h3><span style="display:inline-block; width:8px; height:8px; background:#2dff9d; border-radius:50%; box-shadow:0 0 5px #2dff9d;"></span> 星夜客服機器人</h3>
+      <button class="chat-close" onclick="toggleChatWindow()">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg bot">您好！👋 歡迎來到星夜商城。<br>有任何購買、儲值或特權上的問題嗎？</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" class="chat-input" placeholder="輸入您的問題..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+      <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
+    </div>
+  </div>
+
+
+<script>
+    // 確保頁面載入時執行 Discord Token 檢查
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof checkDiscordLogin === 'function') {
+            checkDiscordLogin();
+        }
+    });
+</script>
 </body>
+
 </html>
